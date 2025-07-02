@@ -1,0 +1,24 @@
+name: reading-tracker
+metadata:
+  template: reading-tracker@0.0.1-beta
+services:
+  api:
+    project: ./api
+    language: js
+    host: function
+hooks:
+  postprovision:
+    shell: pwsh
+    run: |
+      echo "Setting up Azure OpenAI configuration..."
+      if ($env:AZURE_OPENAI_ENDPOINT -and $env:AZURE_OPENAI_API_KEY) {
+        azd env set AZURE_OPENAI_ENDPOINT $env:AZURE_OPENAI_ENDPOINT
+        azd env set AZURE_OPENAI_API_KEY $env:AZURE_OPENAI_API_KEY
+        azd env set AZURE_OPENAI_DEPLOYMENT_NAME $env:AZURE_OPENAI_DEPLOYMENT_NAME
+      }
+  postdeploy:
+    shell: pwsh  
+    run: |
+      $functionAppName = azd env get-values --output json | ConvertFrom-Json | Select-Object -ExpandProperty API_URI
+      echo "Reading Tracker API deployed to: $functionAppName"
+      echo "Configure your frontend with this URL: $functionAppName"

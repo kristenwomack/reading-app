@@ -1,10 +1,11 @@
 const { app } = require('@azure/functions');
-const OpenAI = require('openai');
+const { OpenAIClient, AzureKeyCredential } = require('@azure/openai');
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
+// Initialize Azure OpenAI client
+const openaiClient = new OpenAIClient(
+  process.env.AZURE_OPENAI_ENDPOINT,
+  new AzureKeyCredential(process.env.AZURE_OPENAI_API_KEY)
+);
 
 // In-memory storage for demo (in production, use Azure Storage/CosmosDB)
 let booksData = [];
@@ -43,6 +44,48 @@ app.http('books', {
         status: 500,
         headers,
         body: JSON.stringify({ error: error.message })
+      };
+    }
+  }
+});
+
+// Health check endpoint
+app.http('health', {
+  methods: ['GET'],
+  authLevel: 'anonymous',
+  route: 'health',
+  handler: async (request, context) => {
+    const headers = {
+      'Access-Control-Allow-Origin': '*',
+      'Content-Type': 'application/json'
+    };
+
+    try {
+      const health = {
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        version: '1.0.0',
+        environment: process.env.AZURE_FUNCTIONS_ENVIRONMENT || 'development',
+        azureOpenAI: {
+          configured: !!(process.env.AZURE_OPENAI_ENDPOINT && process.env.AZURE_OPENAI_API_KEY),
+          endpoint: process.env.AZURE_OPENAI_ENDPOINT ? 'configured' : 'missing'
+        }
+      };
+
+      return {
+        status: 200,
+        headers,
+        body: JSON.stringify(health)
+      };
+    } catch (error) {
+      return {
+        status: 503,
+        headers,
+        body: JSON.stringify({
+          status: 'unhealthy',
+          error: error.message,
+          timestamp: new Date().toISOString()
+        })
       };
     }
   }
@@ -91,18 +134,18 @@ async function handleSync(request, headers) {
 async function handleChat(request, headers) {
   const { message, books } = await request.json();
   
-  if (!process.env.OPENAI_API_KEY) {
+  if (!process.env.AZURE_OPENAI_ENDPOINT || !process.env.AZURE_OPENAI_API_KEY) {
     return {
       status: 400,
       headers,
-      body: JSON.stringify({ error: 'OpenAI API key not configured' })
+      body: JSON.stringify({ error: 'Azure OpenAI not configured' })
     };
   }
 
   try {
-    const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [
+    const completion = await openaiClient.getChatCompletions(
+      process.env.AZURE_OPENAI_DEPLOYMENT_NAME || "gpt-35-turbo",
+      [
         {
           role: "system",
           content: `You are a helpful reading assistant. You help manage a personal reading library and provide book recommendations. 
@@ -133,9 +176,11 @@ For other queries, provide helpful conversational responses about books and read
           content: message
         }
       ],
-      max_tokens: 500,
-      temperature: 0.7
-    });
+      {
+        maxTokens: 500,
+        temperature: 0.7
+      }
+    );
 
     const response = completion.choices[0].message.content;
     
