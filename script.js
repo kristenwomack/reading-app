@@ -2,7 +2,7 @@
 class ReadingTracker {
     constructor() {
         this.books = [];
-        this.goal = 24; // Default annual goal
+        this.goal = 90; // 2025 annual reading goal
         this.API_BASE = 'http://localhost:7071/api'; // Default to local development
         this.isOnline = navigator.onLine;
         
@@ -10,10 +10,15 @@ class ReadingTracker {
     }
 
     async init() {
+        console.log('ReadingTracker initializing...');
         await this.loadBooksData();
+        console.log('Books loaded, setting up event listeners...');
         this.setupEventListeners();
+        console.log('Event listeners set up, rendering dashboard...');
         this.renderDashboard();
+        console.log('Dashboard rendered, detecting API endpoint...');
         this.detectAPIEndpoint();
+        console.log('ReadingTracker initialization complete.');
     }
 
     async detectAPIEndpoint() {
@@ -30,45 +35,84 @@ class ReadingTracker {
 
     async loadBooksData() {
         try {
+            console.log('loadBooksData: Starting to load books...');
+            
+            // First check if books data is available from the global script
+            if (window.booksData && Array.isArray(window.booksData)) {
+                this.books = window.booksData;
+                console.log('Loaded books from global data:', this.books.length);
+                
+                // Test filtering right here
+                const completed2025 = this.books.filter(book => 
+                    book.Shelf === 'read' && 
+                    book['Date Read'] && 
+                    book['Date Read'].startsWith('2025')
+                );
+                console.log('Books completed in 2025 (from global data):', completed2025.length);
+                return;
+            }
+            
             // Try to load from Azure Functions first
             if (this.isOnline) {
+                console.log('loadBooksData: Trying API first...');
                 const response = await fetch(`${this.API_BASE}/books`);
                 if (response.ok) {
                     this.books = await response.json();
+                    console.log('Loaded books from API:', this.books.length);
                     return;
                 }
             }
             
             // Fallback to local JSON file
+            console.log('loadBooksData: Loading from local JSON file...');
             const response = await fetch('./books.json');
             if (response.ok) {
                 this.books = await response.json();
+                console.log('Loaded books from local JSON:', this.books.length);
+                console.log('Sample book:', this.books[0]);
+                
+                // Test filtering right here
+                const completed2025 = this.books.filter(book => 
+                    book.Shelf === 'read' && 
+                    book['Date Read'] && 
+                    book['Date Read'].startsWith('2025')
+                );
+                console.log('Books completed in 2025 (in loadBooksData):', completed2025.length);
+                return; // Successfully loaded
             } else {
-                this.books = this.getDefaultBooks();
+                console.error('Failed to load books.json');
+                throw new Error('Failed to load books.json');
             }
         } catch (error) {
             console.warn('Failed to load books data:', error);
+            console.log('Using default books for testing...');
             this.books = this.getDefaultBooks();
         }
     }
 
     getDefaultBooks() {
+        // Return some test data to verify the rendering works
         return [
             {
-                title: "The DevOps Handbook",
-                author: "Gene Kim",
-                status: "completed",
-                pages: 480,
-                completedDate: "2024-01-15",
-                rating: 5
+                "Title": "Test Book 1",
+                "Author": "Test Author",
+                "Shelf": "read",
+                "Date Read": "2025/01/15",
+                "Number of Pages": 300
             },
             {
-                title: "Clean Architecture",
-                author: "Robert C. Martin",
-                status: "reading",
-                pages: 432,
-                currentPage: 120,
-                startDate: "2024-02-01"
+                "Title": "Test Book 2",
+                "Author": "Test Author",
+                "Shelf": "read",
+                "Date Read": "2025/02/20",
+                "Number of Pages": 250
+            },
+            {
+                "Title": "Test Book 3",
+                "Author": "Test Author",
+                "Shelf": "currently-reading",
+                "Date Read": "",
+                "Number of Pages": 400
             }
         ];
     }
@@ -78,7 +122,7 @@ class ReadingTracker {
         const goalInput = document.getElementById('goal-input');
         if (goalInput) {
             goalInput.addEventListener('change', (e) => {
-                this.goal = parseInt(e.target.value) || 24;
+                this.goal = parseInt(e.target.value) || 90;
                 this.renderDashboard();
             });
         }
@@ -103,42 +147,90 @@ class ReadingTracker {
     }
 
     renderDashboard() {
+        console.log('renderDashboard: Starting render...');
         this.renderStats();
         this.renderProgress();
         this.renderBooksList();
+        console.log('renderDashboard: Render complete.');
     }
 
     renderStats() {
-        const completed = this.books.filter(book => book.status === 'completed').length;
-        const reading = this.books.filter(book => book.status === 'reading').length;
-        const totalPages = this.books
-            .filter(book => book.status === 'completed')
-            .reduce((sum, book) => sum + (book.pages || 0), 0);
+        console.log('Total books loaded:', this.books.length);
+        
+        // Filter books completed in 2025 (using your data format)
+        const completed2025 = this.books.filter(book => 
+            book.Shelf === 'read' && 
+            book['Date Read'] && 
+            book['Date Read'].startsWith('2025')
+        );
+        
+        console.log('Books completed in 2025:', completed2025.length);
+        console.log('Sample completed book:', completed2025[0]);
+        
+        const currentlyReading = this.books.filter(book => 
+            book.Shelf === 'currently-reading' || 
+            (book.Shelf === 'to-read' && book['Date Read'] === '')
+        ).length;
+        
+        const totalPages2025 = completed2025.reduce((sum, book) => sum + (book['Number of Pages'] || 0), 0);
 
-        document.getElementById('books-completed').textContent = completed;
-        document.getElementById('books-reading').textContent = reading;
-        document.getElementById('total-pages').textContent = totalPages.toLocaleString();
+        // Update elements that exist
+        const booksCompletedEl = document.getElementById('books-completed');
+        const booksReadingEl = document.getElementById('books-reading'); 
+        const totalPagesEl = document.getElementById('total-pages');
+        const pagesPerDayEl = document.getElementById('pages-per-day');
+        const avgPagesPerDayEl = document.getElementById('avg-pages-per-day');
+        
+        if (booksCompletedEl) booksCompletedEl.textContent = completed2025.length;
+        if (booksReadingEl) booksReadingEl.textContent = currentlyReading;
+        if (totalPagesEl) totalPagesEl.textContent = totalPages2025.toLocaleString();
         
         // Calculate pages per day this year
-        const startOfYear = new Date(new Date().getFullYear(), 0, 1);
+        const startOfYear = new Date(2025, 0, 1);
         const daysSinceStart = Math.floor((new Date() - startOfYear) / (1000 * 60 * 60 * 24));
-        const pagesPerDay = daysSinceStart > 0 ? Math.round(totalPages / daysSinceStart) : 0;
-        document.getElementById('pages-per-day').textContent = pagesPerDay;
+        const pagesPerDay = daysSinceStart > 0 ? Math.round(totalPages2025 / daysSinceStart) : 0;
+        if (pagesPerDayEl) pagesPerDayEl.textContent = pagesPerDay;
+        if (avgPagesPerDayEl) avgPagesPerDayEl.textContent = pagesPerDay;
+        
+        // Calculate books this month (July 2025)
+        const booksThisMonth = this.books.filter(book => 
+            book.Shelf === 'read' && 
+            book['Date Read'] && 
+            book['Date Read'].startsWith('2025/07')
+        ).length;
+        
+        const booksThisMonthEl = document.getElementById('books-this-month');
+        if (booksThisMonthEl) booksThisMonthEl.textContent = booksThisMonth;
+        
+        // Update currently reading count
+        const currentlyReadingCountEl = document.getElementById('currentlyReadingCount');
+        if (currentlyReadingCountEl) currentlyReadingCountEl.textContent = `(${currentlyReading})`;
     }
 
     renderProgress() {
-        const completed = this.books.filter(book => book.status === 'completed').length;
+        // Count books completed in 2025
+        const completed = this.books.filter(book => 
+            book.Shelf === 'read' && 
+            book['Date Read'] && 
+            book['Date Read'].startsWith('2025')
+        ).length;
         const progressPercentage = Math.min((completed / this.goal) * 100, 100);
+        
+        console.log('renderProgress: completed =', completed, 'goal =', this.goal, 'percentage =', progressPercentage);
         
         const progressBar = document.getElementById('progress-bar');
         const progressText = document.getElementById('progress-text');
         
+        console.log('renderProgress: progressBar =', progressBar, 'progressText =', progressText);
+        
         if (progressBar) {
             progressBar.style.width = `${progressPercentage}%`;
+            console.log('renderProgress: set progressBar width to', `${progressPercentage}%`);
         }
         
         if (progressText) {
             progressText.textContent = `${completed} of ${this.goal} books (${Math.round(progressPercentage)}%)`;
+            console.log('renderProgress: set progressText to', `${completed} of ${this.goal} books (${Math.round(progressPercentage)}%)`);
         }
     }
 
@@ -146,49 +238,79 @@ class ReadingTracker {
         const booksList = document.getElementById('books-list');
         if (!booksList) return;
 
-        booksList.innerHTML = this.books.map(book => `
-            <div class="book-card ${book.status}">
-                <div class="book-info">
-                    <h3>${book.title}</h3>
-                    <p class="author">by ${book.author}</p>
-                    <div class="book-meta">
-                        <span class="status ${book.status}">${book.status}</span>
-                        <span class="pages">${book.pages} pages</span>
-                        ${book.rating ? `<span class="rating">${'★'.repeat(book.rating)}</span>` : ''}
+        // Show only recent books (2025 reads, currently reading, or recent additions)
+        const relevantBooks = this.books.filter(book => 
+            (book.Shelf === 'read' && book['Date Read'] && book['Date Read'].startsWith('2025')) ||
+            book.Shelf === 'currently-reading' ||
+            (book['Date Added'] && book['Date Added'].startsWith('2025'))
+        ).slice(0, 20); // Limit to 20 most relevant books
+
+        booksList.innerHTML = relevantBooks.map(book => {
+            const status = book.Shelf === 'read' ? 'completed' : 
+                          book.Shelf === 'currently-reading' ? 'reading' : 'to-read';
+            const rating = book['My Rating'] ? '★'.repeat(parseInt(book['My Rating'])) : '';
+            
+            return `
+                <div class="book-card ${status}">
+                    <div class="book-info">
+                        <h3>${book.Title || 'Unknown Title'}</h3>
+                        <p class="author">by ${book.Author || 'Unknown Author'}</p>
+                        <div class="book-meta">
+                            <span class="status ${status}">${status}</span>
+                            <span class="pages">${book['Number of Pages'] || 0} pages</span>
+                            ${rating ? `<span class="rating">${rating}</span>` : ''}
+                            ${book['Date Read'] ? `<span class="date">Finished: ${book['Date Read']}</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="book-actions">
+                        <button onclick="readingTracker.editBook('${book.Title}')" class="btn-secondary">Edit</button>
+                        <button onclick="readingTracker.deleteBook('${book.Title}')" class="btn-danger">Delete</button>
                     </div>
                 </div>
-                <div class="book-actions">
-                    <button onclick="readingTracker.editBook('${book.title}')" class="btn-secondary">Edit</button>
-                    <button onclick="readingTracker.deleteBook('${book.title}')" class="btn-danger">Delete</button>
-                </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
     showAddBookModal() {
-        // Simple prompt for now - could be enhanced with a proper modal
-        const title = prompt('Book title:');
-        if (!title) return;
-        
-        const author = prompt('Author:');
-        if (!author) return;
-        
-        const pages = parseInt(prompt('Number of pages:')) || 0;
-        
-        this.addBook({
-            title,
-            author,
-            pages,
-            status: 'reading',
-            startDate: new Date().toISOString().split('T')[0]
-        });
+        const modal = document.getElementById('addBookModal');
+        if (modal) {
+            modal.style.display = 'block';
+        }
     }
 
     showAIChatModal() {
-        const message = prompt('Ask your reading assistant anything:');
-        if (!message) return;
-        
-        this.chatWithAI(message);
+        const modal = document.getElementById('aiChatModal');
+        if (modal) {
+            modal.style.display = 'block';
+        }
+    }
+
+    showStatsView() {
+        // For now, just scroll to stats section or could open a detailed stats modal
+        const statsSection = document.querySelector('.stats-section');
+        if (statsSection) {
+            statsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+
+    showSearchModal() {
+        // Placeholder for search functionality
+        alert('Search functionality coming soon!');
+    }
+
+    closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+
+    sendChatMessage() {
+        const input = document.getElementById('chatInput');
+        if (input && input.value.trim()) {
+            this.chatWithAI(input.value.trim());
+            input.value = '';
+        }
     }
 
     async addBook(book) {
@@ -283,9 +405,55 @@ class ReadingTracker {
     }
 }
 
+// Global function wrappers for HTML onclick handlers
+function showAddBookModal() {
+    if (window.readingTracker) {
+        window.readingTracker.showAddBookModal();
+    }
+}
+
+function showStatsView() {
+    if (window.readingTracker) {
+        window.readingTracker.showStatsView();
+    }
+}
+
+function showSearchModal() {
+    if (window.readingTracker) {
+        window.readingTracker.showSearchModal();
+    }
+}
+
+function toggleChatAssistant() {
+    if (window.readingTracker) {
+        window.readingTracker.showAIChatModal();
+    }
+}
+
+function closeModal(modalId) {
+    if (window.readingTracker) {
+        window.readingTracker.closeModal(modalId);
+    }
+}
+
+function sendChatMessage() {
+    if (window.readingTracker) {
+        window.readingTracker.sendChatMessage();
+    }
+}
+
 // Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM loaded, initializing ReadingTracker...');
     window.readingTracker = new ReadingTracker();
+    
+    // Also call renderProgress again after a short delay to ensure DOM is ready
+    setTimeout(() => {
+        if (window.readingTracker) {
+            console.log('Calling renderProgress again after delay...');
+            window.readingTracker.renderProgress();
+        }
+    }, 100);
 });
 
 // Handle online/offline status

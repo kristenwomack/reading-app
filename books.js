@@ -1,3 +1,4 @@
+window.booksData = 
 [
   {
     "Title": "Tools and Weapons: The Promise and the Peril of the Digital Age",
@@ -20229,4 +20230,4 @@
     "Shelf": "read",
     "My Review": ""
   }
-]
+];
