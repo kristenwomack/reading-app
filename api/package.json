@@ -1,0 +1,19 @@
+{
+  "name": "reading-tracker-api",
+  "version": "1.0.0",
+  "description": "Azure Functions backend for Reading Tracker",
+  "main": "index.js",
+  "scripts": {
+    "start": "func start",
+    "test": "echo \"No tests specified\"",
+    "dev": "func start --port 7071",
+    "clean": "rm -rf dist node_modules/.cache"
+  },
+  "dependencies": {
+    "@azure/functions": "^4.0.0",
+    "@azure/openai": "^1.0.0-beta.12"
+  },
+  "devDependencies": {
+    "azure-functions-core-tools": "^4.0.0"
+  }
+}

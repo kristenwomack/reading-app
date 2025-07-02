@@ -1,0 +1,30 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environmentName": {
+      "value": "${AZURE_ENV_NAME}"
+    },
+    "location": {
+      "value": "${AZURE_LOCATION=eastus}"
+    },
+    "openAiLocation": {
+      "value": "${AZURE_OPENAI_LOCATION=eastus}"
+    },
+    "openAiResourceName": {
+      "value": "${AZURE_OPENAI_RESOURCE_NAME=}"
+    },
+    "openAiSkuName": {
+      "value": "${AZURE_OPENAI_SKU_NAME=S0}"
+    },
+    "openAiDeploymentName": {
+      "value": "${AZURE_OPENAI_DEPLOYMENT_NAME=gpt-35-turbo}"
+    },
+    "openAiModelName": {
+      "value": "${AZURE_OPENAI_MODEL_NAME=gpt-35-turbo}"
+    },
+    "openAiModelVersion": {
+      "value": "${AZURE_OPENAI_MODEL_VERSION=0613}"
+    }
+  }
+}

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Test</title>
+</head>
+<body>
+    <div id="test-results"></div>
+    
+    <script>
+    async function testBookData() {
+        try {
+            const response = await fetch('./books.json');
+            const books = await response.json();
+            
+            console.log('Total books:', books.length);
+            
+            // Filter books completed in 2025
+            const completed2025 = books.filter(book => 
+                book.Shelf === 'read' && 
+                book['Date Read'] && 
+                book['Date Read'].startsWith('2025')
+            );
+            
+            console.log('Books completed in 2025:', completed2025.length);
+            console.log('Sample completed book:', completed2025[0]);
+            
+            // Display results
+            document.getElementById('test-results').innerHTML = `
+                <h1>Debug Results</h1>
+                <p>Total books: ${books.length}</p>
+                <p>Books completed in 2025: ${completed2025.length}</p>
+                <p>Sample completed book: ${JSON.stringify(completed2025[0], null, 2)}</p>
+                <h2>All 2025 books:</h2>
+                <ul>
+                    ${completed2025.map(book => 
+                        `<li>${book.Title} by ${book.Author} - Read: ${book['Date Read']}</li>`
+                    ).join('')}
+                </ul>
+            `;
+            
+        } catch (error) {
+            console.error('Error:', error);
+            document.getElementById('test-results').innerHTML = `Error: ${error.message}`;
+        }
+    }
+    
+    testBookData();
+    </script>
+</body>
+</html>
