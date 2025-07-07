@@ -710,4 +710,46 @@ body {
     color: #ffd700;
 }
 
+/* Read-only indicator styles */
+.read-only-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.read-only-badge {
+    background: var(--accent-orange);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.read-only-indicator small {
+    color: var(--text-muted);
+    font-size: 11px;
+}
+
+.read-only-indicator a {
+    color: var(--accent-blue);
+    text-decoration: none;
+}
+
+.read-only-indicator a:hover {
+    text-decoration: underline;
+}
+
+/* Hide admin features in read-only mode */
+.read-only .action-btn[data-admin="true"],
+.read-only .book-actions,
+.read-only .modal,
+.read-only .chat-panel {
+    display: none !important;
+}
+
 /* Activities Section */

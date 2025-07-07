@@ -9,12 +9,14 @@ A reading dashboard hosted on GitHub Pages with an Azure backend integration and
 
 ## ✨ Features
 
-- **📊 Reading Dashboard**: Beautiful GitHub-styled interface with progress tracking
+- **📊 Reading Dashboard**: GitHub-styled interface with progress tracking
 - **🎯 Goal Management**: Set and track annual reading goals with visual progress bars
-- **📖 Book Management**: Add, track, and manage your reading library
+- **📖 Book Management**: Add, track, and manage your reading library (admin mode)
+- **👁️ Read-Only Mode**: Clean, public dashboard perfect for sharing
+- **🔓 Admin Mode**: Full functionality with URL parameter (`?admin=true`)
 - **🤖 AI Assistant**: Natural language book management powered by Azure OpenAI
 - **☁️ Cloud Sync**: Azure Functions backend for data persistence
-- **📱 Responsive Design**: Works seamlessly on desktop and mobile
+- **📱 Responsive Design**: Works seamlessly on desktop and mobile browsers
 - **🚀 Easy Deployment**: One-click deployment to GitHub Pages + Azure
 
 ## 🏗️ Architecture
@@ -24,10 +26,10 @@ A reading dashboard hosted on GitHub Pages with an Azure backend integration and
 ┌─────────────────────────────────────────────────────────────┐
 │                    GitHub Pages Frontend                    │
 ├─────────────────────────────────────────────────────────────┤
-│  • index.html - Main dashboard interface                   │
-│  • style.css - GitHub-inspired dark theme                  │
-│  • script.js - JavaScript functionality & Azure integration│
-│  • books.json - Local data fallback                        │
+│  • index.html - Main dashboard interface                    │
+│  • style.css - GitHub-inspired dark theme                   │
+│  • script.js - JavaScript functionality & Azure integration │
+│  • books.json - Local data fallback                         │
 └─────────────────────────────────────────────────────────────┘
                               │
                               │ HTTPS API Calls
@@ -35,10 +37,10 @@ A reading dashboard hosted on GitHub Pages with an Azure backend integration and
 ┌─────────────────────────────────────────────────────────────┐
 │                    Azure Functions Backend                  │
 ├─────────────────────────────────────────────────────────────┤
-│  • books.js - Main API endpoints                           │
-│  • /books - CRUD operations for book data                  │
-│  • /books/sync - Data synchronization                      │
-│  • /books/chat - OpenAI integration                        │
+│  • books.js - Main API endpoints                            │
+│  • /books - CRUD operations for book data                   │
+│  • /books/sync - Data synchronization                       │
+│  • /books/chat - OpenAI integration                         │
 └─────────────────────────────────────────────────────────────┘
                               │
                               │ OpenAI API
@@ -46,9 +48,9 @@ A reading dashboard hosted on GitHub Pages with an Azure backend integration and
 ┌─────────────────────────────────────────────────────────────┐
 │                      Azure OpenAI Service                   │
 ├─────────────────────────────────────────────────────────────┤
-│  • Natural language book management                        │
+│  • Natural language book management                         │
 │  • Reading recommendations                                  │
-│  • Intelligent data extraction                             │
+│  • Intelligent data extraction                              │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -137,6 +139,7 @@ azd up
 
 - [📋 Deployment Guide](DEPLOYMENT.md) - Complete deployment instructions
 - [🔧 Development Guide](DEVELOPMENT.md) - Local development and API docs
+- [🔓 Admin Mode Guide](ADMIN-MODE.md) - Admin vs read-only configuration
 - [⚡ azd Migration Summary](AZD-MIGRATION.md) - Modern deployment approach
 
 ## 📁 Project Structure
@@ -299,7 +302,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Built with ❤️ for book lovers who want to track their reading journey with style and intelligence.**
+**Built for book lovers who want to track their reading journey with AI.**
 
 ### 🔗 Quick Links
 - [Live Demo](https://yourusername.github.io/reading-app)

@@ -6,7 +6,31 @@ class ReadingTracker {
         this.API_BASE = 'http://localhost:7071/api'; // Default to local development
         this.isOnline = navigator.onLine;
         
+        // Configuration: Set to false for read-only public dashboard
+        this.isAdminMode = this.checkAdminMode();
+        
         this.init();
+    }
+
+    checkAdminMode() {
+        // Method 1: Check URL parameter (?admin=true)
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('admin') === 'true') {
+            return true;
+        }
+        
+        // Method 2: Check localStorage for admin flag
+        if (localStorage.getItem('reading-tracker-admin') === 'true') {
+            return true;
+        }
+        
+        // Method 3: Check if running on localhost (development)
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            return true;
+        }
+        
+        // Default to read-only for public viewers
+        return false;
     }
 
     async init() {
@@ -118,31 +142,67 @@ class ReadingTracker {
     }
 
     setupEventListeners() {
-        // Goal setting
+        // Hide admin-only features if in read-only mode
+        if (!this.isAdminMode) {
+            this.hideAdminFeatures();
+        }
+        
+        // Goal setting (only in admin mode)
         const goalInput = document.getElementById('goal-input');
-        if (goalInput) {
+        if (goalInput && this.isAdminMode) {
             goalInput.addEventListener('change', (e) => {
                 this.goal = parseInt(e.target.value) || 90;
                 this.renderDashboard();
             });
         }
 
-        // Add book button
+        // Add book button (admin only)
         const addBookBtn = document.getElementById('add-book-btn');
-        if (addBookBtn) {
+        if (addBookBtn && this.isAdminMode) {
             addBookBtn.addEventListener('click', () => this.showAddBookModal());
         }
 
-        // AI Chat button
+        // AI Chat button (admin only)
         const aiChatBtn = document.getElementById('ai-chat-btn');
-        if (aiChatBtn) {
+        if (aiChatBtn && this.isAdminMode) {
             aiChatBtn.addEventListener('click', () => this.showAIChatModal());
         }
 
-        // Sync button
+        // Sync button (admin only)
         const syncBtn = document.getElementById('sync-btn');
-        if (syncBtn) {
+        if (syncBtn && this.isAdminMode) {
             syncBtn.addEventListener('click', () => this.syncData());
+        }
+    }
+
+    hideAdminFeatures() {
+        // Hide admin action buttons
+        const adminButtons = document.querySelectorAll('.action-btn');
+        adminButtons.forEach(button => {
+            const text = button.textContent.toLowerCase();
+            if (text.includes('add book') || text.includes('ai assistant')) {
+                button.style.display = 'none';
+            }
+        });
+        
+        // Hide modals
+        const modals = document.querySelectorAll('.modal, .chat-panel');
+        modals.forEach(modal => modal.style.display = 'none');
+        
+        // Add read-only indicator
+        this.addReadOnlyIndicator();
+    }
+
+    addReadOnlyIndicator() {
+        const header = document.querySelector('.header');
+        if (header) {
+            const indicator = document.createElement('div');
+            indicator.className = 'read-only-indicator';
+            indicator.innerHTML = `
+                <span class="read-only-badge">👁️ Read-Only View</span>
+                <small>This is a public dashboard. <a href="?admin=true">Admin access</a></small>
+            `;
+            header.appendChild(indicator);
         }
     }
 
@@ -250,6 +310,14 @@ class ReadingTracker {
                           book.Shelf === 'currently-reading' ? 'reading' : 'to-read';
             const rating = book['My Rating'] ? '★'.repeat(parseInt(book['My Rating'])) : '';
             
+            // Only show action buttons in admin mode
+            const actionButtons = this.isAdminMode ? `
+                <div class="book-actions">
+                    <button onclick="readingTracker.editBook('${book.Title}')" class="btn-secondary">Edit</button>
+                    <button onclick="readingTracker.deleteBook('${book.Title}')" class="btn-danger">Delete</button>
+                </div>
+            ` : '';
+            
             return `
                 <div class="book-card ${status}">
                     <div class="book-info">
@@ -262,10 +330,7 @@ class ReadingTracker {
                             ${book['Date Read'] ? `<span class="date">Finished: ${book['Date Read']}</span>` : ''}
                         </div>
                     </div>
-                    <div class="book-actions">
-                        <button onclick="readingTracker.editBook('${book.Title}')" class="btn-secondary">Edit</button>
-                        <button onclick="readingTracker.deleteBook('${book.Title}')" class="btn-danger">Delete</button>
-                    </div>
+                    ${actionButtons}
                 </div>
             `;
         }).join('');
