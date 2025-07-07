@@ -1,11 +1,11 @@
 const { app } = require('@azure/functions');
-const { ChatCompletionsClient } = require('@azure/ai-inference');
-const { AzureKeyCredential } = require('@azure/core-auth');
+const { OpenAIClient } = require('@azure/openai');
+const { DefaultAzureCredential } = require('@azure/identity');
 
-// Initialize Azure AI client for Phi-4
-const aiClient = new ChatCompletionsClient(
-  process.env.AZURE_AI_ENDPOINT,
-  new AzureKeyCredential(process.env.AZURE_AI_API_KEY)
+// Initialize Azure OpenAI client with managed identity (secure, no API keys!)
+const aiClient = new OpenAIClient(
+  process.env.AZURE_OPENAI_ENDPOINT || process.env.AZURE_AI_ENDPOINT,
+  new DefaultAzureCredential()
 );
 
 // In-memory storage for demo (in production, use Azure Storage/CosmosDB)
@@ -67,10 +67,11 @@ app.http('health', {
         timestamp: new Date().toISOString(),
         version: '1.0.0',
         environment: process.env.AZURE_FUNCTIONS_ENVIRONMENT || 'development',
-        azureAI: {
-          configured: !!(process.env.AZURE_AI_ENDPOINT && process.env.AZURE_AI_API_KEY),
-          endpoint: process.env.AZURE_AI_ENDPOINT ? 'configured' : 'missing',
-          model: 'Phi-4'
+        azureOpenAI: {
+          configured: !!process.env.AZURE_OPENAI_ENDPOINT,
+          endpoint: process.env.AZURE_OPENAI_ENDPOINT ? 'configured' : 'missing',
+          authentication: 'managed_identity',
+          model: 'o1-mini (or Phi-4 if available)'
         }
       };
 
@@ -136,17 +137,21 @@ async function handleSync(request, headers) {
 async function handleChat(request, headers) {
   const { message, books } = await request.json();
   
-  if (!process.env.AZURE_AI_ENDPOINT || !process.env.AZURE_AI_API_KEY) {
+  if (!process.env.AZURE_OPENAI_ENDPOINT) {
     return {
       status: 400,
       headers,
-      body: JSON.stringify({ error: 'Azure AI not configured' })
+      body: JSON.stringify({ error: 'Azure OpenAI endpoint not configured' })
     };
   }
 
   try {
-    const completion = await aiClient.complete({
-      messages: [
+    // Use gpt-4o-mini or fall back to deployment name from environment
+    const deploymentName = process.env.AZURE_OPENAI_DEPLOYMENT_NAME || 'gpt-4o-mini';
+    
+    const completion = await aiClient.getChatCompletions(
+      deploymentName,
+      [
         {
           role: "system",
           content: `You are a helpful reading assistant. You help manage a personal reading library and provide book recommendations. 
@@ -177,10 +182,11 @@ For other queries, provide helpful conversational responses about books and read
           content: message
         }
       ],
-      model: "Phi-4",
-      max_tokens: 500,
-      temperature: 0.7
-    });
+      {
+        maxTokens: 500,
+        temperature: 0.7
+      }
+    );
 
     const response = completion.choices[0].message.content;
     
