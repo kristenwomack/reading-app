@@ -115,3 +115,4 @@ api/.azurefunctions/
 # Build artifacts
 *.zip
 function.zip
+.azure
