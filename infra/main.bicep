@@ -1,7 +1,7 @@
 // Main infrastructure template for Reading Tracker App
 targetScope = 'resourceGroup'
 
-metadata description = 'Creates Azure infrastructure for Reading Tracker with Azure Functions and OpenAI'
+metadata description = 'Creates Azure infrastructure for Reading Tracker with Azure Functions and Azure AI (Phi-4)'
 
 @minLength(1)
 @maxLength(64)
@@ -12,23 +12,14 @@ param environmentName string
 @description('Primary location for all resources')
 param location string
 
-@description('Name of the Azure OpenAI resource')
-param openAiResourceName string = ''
+@description('Name of the Azure AI resource')
+param aiResourceName string = ''
 
-@description('Location for Azure OpenAI resource (if different from main location)')
-param openAiLocation string = location
+@description('Location for Azure AI resource (if different from main location)')
+param aiLocation string = location
 
-@description('Azure OpenAI SKU name')
-param openAiSkuName string = 'S0'
-
-@description('Name of the Azure OpenAI model deployment')
-param openAiDeploymentName string = 'gpt-35-turbo'
-
-@description('Model name for Azure OpenAI deployment')
-param openAiModelName string = 'gpt-35-turbo'
-
-@description('Model version for Azure OpenAI deployment')
-param openAiModelVersion string = '0613'
+@description('Azure AI SKU name')
+param aiSkuName string = 'S0'
 
 // Generate a unique resource token for naming
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
@@ -39,7 +30,7 @@ var functionAppName = 'func-reading-tracker-${resourceToken}'
 var storageAccountName = 'st${replace(resourceToken, '-', '')}'
 var logAnalyticsWorkspaceName = 'law-reading-tracker-${resourceToken}'
 var applicationInsightsName = 'ai-reading-tracker-${resourceToken}'
-var openAiServiceName = !empty(openAiResourceName) ? openAiResourceName : 'openai-reading-tracker-${resourceToken}'
+var aiServiceName = !empty(aiResourceName) ? aiResourceName : 'ai-reading-tracker-${resourceToken}'
 
 // Tags for all resources
 var tags = {
@@ -124,42 +115,26 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2024-04-01' = {
   }
 }
 
-// Azure OpenAI Service
-resource openAiService 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
-  name: openAiServiceName
-  location: openAiLocation
+// Azure AI Service (for Phi-4 and other AI models)
+resource aiService 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
+  name: aiServiceName
+  location: aiLocation
   tags: tags
   sku: {
-    name: openAiSkuName
+    name: aiSkuName
   }
-  kind: 'OpenAI'
+  kind: 'AIServices'
   properties: {
-    customSubDomainName: openAiServiceName
+    customSubDomainName: aiServiceName
     networkAcls: {
       defaultAction: 'Allow'
       virtualNetworkRules: []
       ipRules: []
     }
     publicNetworkAccess: 'Enabled'
-  }
-}
-
-// Azure OpenAI Model Deployment
-resource openAiModelDeployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
-  parent: openAiService
-  name: openAiDeploymentName
-  properties: {
-    model: {
-      format: 'OpenAI'
-      name: openAiModelName
-      version: openAiModelVersion
+    apiProperties: {
+      statisticsEnabled: false
     }
-    raiPolicyName: 'Microsoft.Default'
-    versionUpgradeOption: 'OnceNewDefaultVersionAvailable'
-  }
-  sku: {
-    name: 'Standard'
-    capacity: 20
   }
 }
 
@@ -210,16 +185,12 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
           value: applicationInsights.properties.ConnectionString
         }
         {
-          name: 'AZURE_OPENAI_ENDPOINT'
-          value: openAiService.properties.endpoint
+          name: 'AZURE_AI_ENDPOINT'
+          value: aiService.properties.endpoint
         }
         {
-          name: 'AZURE_OPENAI_API_KEY'
-          value: openAiService.listKeys().key1
-        }
-        {
-          name: 'AZURE_OPENAI_DEPLOYMENT_NAME'
-          value: openAiDeploymentName
+          name: 'AZURE_AI_API_KEY'
+          value: aiService.listKeys().key1
         }
       ]
       cors: {
@@ -233,7 +204,7 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
   dependsOn: [
     applicationInsights
     storageAccount
-    openAiService
+    aiService
   ]
 }
 
@@ -249,8 +220,10 @@ output API_URI string = 'https://${functionApp.properties.defaultHostName}/api'
 
 output AZURE_FUNCTION_APP_NAME string = functionApp.name
 output AZURE_STORAGE_ACCOUNT_NAME string = storageAccount.name
-output AZURE_OPENAI_SERVICE_NAME string = openAiService.name
-output AZURE_OPENAI_ENDPOINT string = openAiService.properties.endpoint
+output AZURE_AI_SERVICE_NAME string = aiService.name
+output AZURE_AI_ENDPOINT string = aiService.properties.endpoint
+
+output SERVICE_API_IDENTITY_PRINCIPAL_ID string = functionApp.identity.principalId
 output AZURE_OPENAI_DEPLOYMENT_NAME string = openAiDeploymentName
 
 output SERVICE_API_IDENTITY_PRINCIPAL_ID string = functionApp.identity.principalId

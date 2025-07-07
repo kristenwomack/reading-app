@@ -10,11 +10,10 @@ hooks:
   postprovision:
     shell: pwsh
     run: |
-      echo "Setting up Azure OpenAI configuration..."
-      if ($env:AZURE_OPENAI_ENDPOINT -and $env:AZURE_OPENAI_API_KEY) {
-        azd env set AZURE_OPENAI_ENDPOINT $env:AZURE_OPENAI_ENDPOINT
-        azd env set AZURE_OPENAI_API_KEY $env:AZURE_OPENAI_API_KEY
-        azd env set AZURE_OPENAI_DEPLOYMENT_NAME $env:AZURE_OPENAI_DEPLOYMENT_NAME
+      echo "Setting up Azure AI configuration for Phi-4..."
+      if ($env:AZURE_AI_ENDPOINT -and $env:AZURE_AI_API_KEY) {
+        azd env set AZURE_AI_ENDPOINT $env:AZURE_AI_ENDPOINT
+        azd env set AZURE_AI_API_KEY $env:AZURE_AI_API_KEY
       }
   postdeploy:
     shell: pwsh  

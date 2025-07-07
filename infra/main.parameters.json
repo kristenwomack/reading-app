@@ -8,23 +8,14 @@
     "location": {
       "value": "${AZURE_LOCATION=eastus}"
     },
-    "openAiLocation": {
-      "value": "${AZURE_OPENAI_LOCATION=eastus}"
+    "aiLocation": {
+      "value": "${AZURE_AI_LOCATION=eastus}"
     },
-    "openAiResourceName": {
-      "value": "${AZURE_OPENAI_RESOURCE_NAME=}"
+    "aiResourceName": {
+      "value": "${AZURE_AI_RESOURCE_NAME=}"
     },
-    "openAiSkuName": {
-      "value": "${AZURE_OPENAI_SKU_NAME=S0}"
-    },
-    "openAiDeploymentName": {
-      "value": "${AZURE_OPENAI_DEPLOYMENT_NAME=gpt-35-turbo}"
-    },
-    "openAiModelName": {
-      "value": "${AZURE_OPENAI_MODEL_NAME=gpt-35-turbo}"
-    },
-    "openAiModelVersion": {
-      "value": "${AZURE_OPENAI_MODEL_VERSION=0613}"
+    "aiSkuName": {
+      "value": "${AZURE_AI_SKU_NAME=S0}"
     }
   }
 }

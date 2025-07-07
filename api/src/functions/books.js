@@ -1,10 +1,11 @@
 const { app } = require('@azure/functions');
-const { OpenAIClient, AzureKeyCredential } = require('@azure/openai');
+const { ChatCompletionsClient } = require('@azure/ai-inference');
+const { AzureKeyCredential } = require('@azure/core-auth');
 
-// Initialize Azure OpenAI client
-const openaiClient = new OpenAIClient(
-  process.env.AZURE_OPENAI_ENDPOINT,
-  new AzureKeyCredential(process.env.AZURE_OPENAI_API_KEY)
+// Initialize Azure AI client for Phi-4
+const aiClient = new ChatCompletionsClient(
+  process.env.AZURE_AI_ENDPOINT,
+  new AzureKeyCredential(process.env.AZURE_AI_API_KEY)
 );
 
 // In-memory storage for demo (in production, use Azure Storage/CosmosDB)
@@ -66,9 +67,10 @@ app.http('health', {
         timestamp: new Date().toISOString(),
         version: '1.0.0',
         environment: process.env.AZURE_FUNCTIONS_ENVIRONMENT || 'development',
-        azureOpenAI: {
-          configured: !!(process.env.AZURE_OPENAI_ENDPOINT && process.env.AZURE_OPENAI_API_KEY),
-          endpoint: process.env.AZURE_OPENAI_ENDPOINT ? 'configured' : 'missing'
+        azureAI: {
+          configured: !!(process.env.AZURE_AI_ENDPOINT && process.env.AZURE_AI_API_KEY),
+          endpoint: process.env.AZURE_AI_ENDPOINT ? 'configured' : 'missing',
+          model: 'Phi-4'
         }
       };
 
@@ -134,18 +136,17 @@ async function handleSync(request, headers) {
 async function handleChat(request, headers) {
   const { message, books } = await request.json();
   
-  if (!process.env.AZURE_OPENAI_ENDPOINT || !process.env.AZURE_OPENAI_API_KEY) {
+  if (!process.env.AZURE_AI_ENDPOINT || !process.env.AZURE_AI_API_KEY) {
     return {
       status: 400,
       headers,
-      body: JSON.stringify({ error: 'Azure OpenAI not configured' })
+      body: JSON.stringify({ error: 'Azure AI not configured' })
     };
   }
 
   try {
-    const completion = await openaiClient.getChatCompletions(
-      process.env.AZURE_OPENAI_DEPLOYMENT_NAME || "gpt-35-turbo",
-      [
+    const completion = await aiClient.complete({
+      messages: [
         {
           role: "system",
           content: `You are a helpful reading assistant. You help manage a personal reading library and provide book recommendations. 
@@ -176,11 +177,10 @@ For other queries, provide helpful conversational responses about books and read
           content: message
         }
       ],
-      {
-        maxTokens: 500,
-        temperature: 0.7
-      }
-    );
+      model: "Phi-4",
+      max_tokens: 500,
+      temperature: 0.7
+    });
 
     const response = completion.choices[0].message.content;
     
@@ -193,7 +193,7 @@ For other queries, provide helpful conversational responses about books and read
     return {
       status: 500,
       headers,
-      body: JSON.stringify({ error: 'Failed to process chat request' })
+      body: JSON.stringify({ error: `Failed to process chat request: ${error.message}` })
     };
   }
 }
