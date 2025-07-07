@@ -11,8 +11,7 @@
   },
   "dependencies": {
     "@azure/functions": "^4.0.0",
-    "@azure/openai": "^2.0.0",
-    "@azure/identity": "^4.0.1"
+    "@azure/openai": "^1.0.0-beta.12"
   },
   "devDependencies": {
     "azure-functions-core-tools": "^4.0.0"

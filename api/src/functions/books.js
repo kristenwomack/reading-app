@@ -1,11 +1,10 @@
 const { app } = require('@azure/functions');
-const { OpenAIClient } = require('@azure/openai');
-const { DefaultAzureCredential } = require('@azure/identity');
+const { OpenAIClient, AzureKeyCredential } = require('@azure/openai');
 
-// Initialize Azure OpenAI client with managed identity (secure, no API keys!)
-const aiClient = new OpenAIClient(
-  process.env.AZURE_OPENAI_ENDPOINT || process.env.AZURE_AI_ENDPOINT,
-  new DefaultAzureCredential()
+// Initialize Azure OpenAI client for GPT-4o
+const openaiClient = new OpenAIClient(
+  process.env.AZURE_OPENAI_ENDPOINT,
+  new AzureKeyCredential(process.env.AZURE_OPENAI_API_KEY)
 );
 
 // In-memory storage for demo (in production, use Azure Storage/CosmosDB)
@@ -68,10 +67,9 @@ app.http('health', {
         version: '1.0.0',
         environment: process.env.AZURE_FUNCTIONS_ENVIRONMENT || 'development',
         azureOpenAI: {
-          configured: !!process.env.AZURE_OPENAI_ENDPOINT,
+          configured: !!(process.env.AZURE_OPENAI_ENDPOINT && process.env.AZURE_OPENAI_API_KEY),
           endpoint: process.env.AZURE_OPENAI_ENDPOINT ? 'configured' : 'missing',
-          authentication: 'managed_identity',
-          model: 'o1-mini (or Phi-4 if available)'
+          model: 'GPT-4o'
         }
       };
 
@@ -137,20 +135,17 @@ async function handleSync(request, headers) {
 async function handleChat(request, headers) {
   const { message, books } = await request.json();
   
-  if (!process.env.AZURE_OPENAI_ENDPOINT) {
+  if (!process.env.AZURE_OPENAI_ENDPOINT || !process.env.AZURE_OPENAI_API_KEY) {
     return {
       status: 400,
       headers,
-      body: JSON.stringify({ error: 'Azure OpenAI endpoint not configured' })
+      body: JSON.stringify({ error: 'Azure OpenAI not configured' })
     };
   }
 
   try {
-    // Use gpt-4o-mini or fall back to deployment name from environment
-    const deploymentName = process.env.AZURE_OPENAI_DEPLOYMENT_NAME || 'gpt-4o-mini';
-    
-    const completion = await aiClient.getChatCompletions(
-      deploymentName,
+    const completion = await openaiClient.getChatCompletions(
+      process.env.AZURE_OPENAI_DEPLOYMENT_NAME || "gpt-4o",
       [
         {
           role: "system",
