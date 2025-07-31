@@ -1,5 +1,14 @@
 const { app } = require('@azure/functions');
 const { OpenAIClient, AzureKeyCredential } = require('@azure/openai');
+const { 
+  searchBooksByTitle, 
+  searchAuthorsByName, 
+  getBookById, 
+  getAuthorInfo,
+  getBookCoverUrl,
+  getAuthorPhotoUrl,
+  enrichBookData 
+} = require('../services/openLibraryService');
 
 // Initialize Azure OpenAI client for GPT-4o
 const openaiClient = new OpenAIClient(
@@ -35,6 +44,14 @@ app.http('books', {
           return await handleSync(request, headers);
         case 'chat':
           return await handleChat(request, headers);
+        case 'search':
+          return await handleSearch(request, headers);
+        case 'enrich':
+          return await handleEnrich(request, headers);
+        case 'author':
+          return await handleAuthorSearch(request, headers);
+        case 'cover':
+          return await handleCoverUrl(request, headers);
         default:
           return await handleBooks(request, headers);
       }
@@ -149,9 +166,17 @@ async function handleChat(request, headers) {
       [
         {
           role: "system",
-          content: `You are a helpful reading assistant. You help manage a personal reading library and provide book recommendations. 
+          content: `You are a helpful reading assistant with access to Open Library data. You help manage a personal reading library and provide book recommendations. 
 
-Current library contains ${books?.length || 0} books. When adding books, respond with a JSON object containing the book details in this format:
+Current library contains ${books?.length || 0} books. When adding books, you can search Open Library for accurate book details. 
+
+For book-related queries, you can:
+1. Search for books by title using Open Library
+2. Find author information
+3. Get book covers and metadata
+4. Provide reading recommendations
+
+When adding books, respond with a JSON object containing the book details in this format:
 {
   "action": "add_book",
   "book": {
@@ -168,6 +193,12 @@ Current library contains ${books?.length || 0} books. When adding books, respond
     "rating": null,
     "notes": ""
   }
+}
+
+For searches, respond with:
+{
+  "action": "search_books",
+  "query": "search term"
 }
 
 For other queries, provide helpful conversational responses about books and reading.`
@@ -195,6 +226,153 @@ For other queries, provide helpful conversational responses about books and read
       status: 500,
       headers,
       body: JSON.stringify({ error: `Failed to process chat request: ${error.message}` })
+    };
+  }
+}
+
+// New Open Library integration handlers
+async function handleSearch(request, headers) {
+  try {
+    const url = new URL(request.url);
+    const title = url.searchParams.get('title');
+    const author = url.searchParams.get('author');
+
+    if (!title && !author) {
+      return {
+        status: 400,
+        headers,
+        body: JSON.stringify({ error: 'Either title or author parameter is required' })
+      };
+    }
+
+    let results = [];
+
+    if (title) {
+      results = await searchBooksByTitle(title);
+    } else if (author) {
+      const authorResults = await searchAuthorsByName(author);
+      results = authorResults;
+    }
+
+    return {
+      status: 200,
+      headers,
+      body: JSON.stringify({ results, total: results.length })
+    };
+  } catch (error) {
+    return {
+      status: 500,
+      headers,
+      body: JSON.stringify({ error: `Search failed: ${error.message}` })
+    };
+  }
+}
+
+async function handleEnrich(request, headers) {
+  try {
+    const bookData = await request.json();
+    
+    if (!bookData.title) {
+      return {
+        status: 400,
+        headers,
+        body: JSON.stringify({ error: 'Book title is required for enrichment' })
+      };
+    }
+
+    const enrichedBook = await enrichBookData(bookData);
+
+    return {
+      status: 200,
+      headers,
+      body: JSON.stringify({ book: enrichedBook })
+    };
+  } catch (error) {
+    return {
+      status: 500,
+      headers,
+      body: JSON.stringify({ error: `Enrichment failed: ${error.message}` })
+    };
+  }
+}
+
+async function handleAuthorSearch(request, headers) {
+  try {
+    const url = new URL(request.url);
+    const name = url.searchParams.get('name');
+    const key = url.searchParams.get('key');
+
+    if (!name && !key) {
+      return {
+        status: 400,
+        headers,
+        body: JSON.stringify({ error: 'Either name or key parameter is required' })
+      };
+    }
+
+    let result;
+
+    if (key) {
+      result = await getAuthorInfo(key);
+      if (!result) {
+        return {
+          status: 404,
+          headers,
+          body: JSON.stringify({ error: 'Author not found' })
+        };
+      }
+    } else {
+      result = await searchAuthorsByName(name);
+    }
+
+    return {
+      status: 200,
+      headers,
+      body: JSON.stringify({ result })
+    };
+  } catch (error) {
+    return {
+      status: 500,
+      headers,
+      body: JSON.stringify({ error: `Author search failed: ${error.message}` })
+    };
+  }
+}
+
+async function handleCoverUrl(request, headers) {
+  try {
+    const url = new URL(request.url);
+    const key = url.searchParams.get('key');
+    const value = url.searchParams.get('value');
+    const size = url.searchParams.get('size') || 'L';
+    const type = url.searchParams.get('type'); // 'book' or 'author'
+
+    if (!key || !value) {
+      return {
+        status: 400,
+        headers,
+        body: JSON.stringify({ error: 'Both key and value parameters are required' })
+      };
+    }
+
+    let coverUrl;
+    
+    if (type === 'author') {
+      coverUrl = getAuthorPhotoUrl(value);
+    } else {
+      coverUrl = getBookCoverUrl(key, value, size);
+    }
+
+    return {
+      status: 200,
+      headers,
+      body: JSON.stringify({ coverUrl })
+    };
+  } catch (error) {
+    return {
+      status: 500,
+      headers,
+      body: JSON.stringify({ error: `Cover URL generation failed: ${error.message}` })
     };
   }
 }
