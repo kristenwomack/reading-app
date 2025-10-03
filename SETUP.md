@@ -1,6 +1,5 @@
-# Reading Tracker - Azure Functions + MCP Server Integration
+# Reading Tracker
 
-This project combines a **Reading Tracker web app** with **Azure Functions backend** and an **MCP Server** for AI-powered book management.
 
 ## Project Structure
 
