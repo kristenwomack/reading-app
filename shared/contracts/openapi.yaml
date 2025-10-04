@@ -1,0 +1,322 @@
+openapi: 3.0.3
+info:
+  title: Reading Tracker API
+  description: REST API for reading progress tracking
+  version: 1.0.0
+  contact:
+    name: Reading App
+servers:
+  - url: http://localhost:8080/api
+    description: Local development server
+
+paths:
+  /years:
+    get:
+      summary: Get available years
+      description: Returns all years that have at least one book with a "Date Read" entry
+      operationId: getYears
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/YearsResponse'
+              examples:
+                typical:
+                  value:
+                    years:
+                      - year: 2025
+                        count: 12
+                      - year: 2024
+                        count: 45
+                      - year: 2023
+                        count: 38
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /books:
+    get:
+      summary: Get books for a year
+      description: Returns all books read in the specified year with "read" shelf status
+      operationId: getBooks
+      parameters:
+        - name: year
+          in: query
+          required: true
+          description: Year to filter books by
+          schema:
+            type: integer
+            minimum: 1900
+            maximum: 2100
+            example: 2025
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BooksResponse'
+              examples:
+                with-books:
+                  value:
+                    books:
+                      - title: "Co-Intelligence"
+                        author: "Ethan Mollick"
+                        dateRead: "2025/09/19"
+                        pages: 0
+                        month: 9
+                      - title: "Adulthood Rites"
+                        author: "Octavia E. Butler"
+                        dateRead: "2025/08/05"
+                        pages: 320
+                        month: 8
+                empty:
+                  value:
+                    books: []
+        '400':
+          description: Invalid year parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /stats:
+    get:
+      summary: Get statistics for a year
+      description: Returns comprehensive reading statistics for the specified year
+      operationId: getStats
+      parameters:
+        - name: year
+          in: query
+          required: true
+          description: Year to calculate statistics for
+          schema:
+            type: integer
+            minimum: 1900
+            maximum: 2100
+            example: 2025
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatsResponse'
+              examples:
+                typical:
+                  value:
+                    year: 2025
+                    totalBooks: 12
+                    totalPages: 3240
+                    averagePerMonth: 1.0
+                    monthlyBreakdown:
+                      - month: 1
+                        monthName: "Jan"
+                        count: 2
+                      - month: 2
+                        monthName: "Feb"
+                        count: 1
+                      - month: 3
+                        monthName: "Mar"
+                        count: 0
+                      - month: 4
+                        monthName: "Apr"
+                        count: 0
+                      - month: 5
+                        monthName: "May"
+                        count: 0
+                      - month: 6
+                        monthName: "Jun"
+                        count: 1
+                      - month: 7
+                        monthName: "Jul"
+                        count: 0
+                      - month: 8
+                        monthName: "Aug"
+                        count: 1
+                      - month: 9
+                        monthName: "Sep"
+                        count: 3
+                      - month: 10
+                        monthName: "Oct"
+                        count: 2
+                      - month: 11
+                        monthName: "Nov"
+                        count: 1
+                      - month: 12
+                        monthName: "Dec"
+                        count: 1
+                empty:
+                  value:
+                    year: 2023
+                    totalBooks: 0
+                    totalPages: 0
+                    averagePerMonth: 0.0
+                    monthlyBreakdown:
+                      - month: 1
+                        monthName: "Jan"
+                        count: 0
+                      # ... all months with count: 0
+        '400':
+          description: Invalid year parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    YearsResponse:
+      type: object
+      required:
+        - years
+      properties:
+        years:
+          type: array
+          items:
+            $ref: '#/components/schemas/YearOption'
+          description: List of years with book counts, sorted descending
+
+    YearOption:
+      type: object
+      required:
+        - year
+        - count
+      properties:
+        year:
+          type: integer
+          description: Year value
+          example: 2025
+        count:
+          type: integer
+          description: Number of books read in this year
+          example: 12
+
+    BooksResponse:
+      type: object
+      required:
+        - books
+      properties:
+        books:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookSummary'
+          description: Books read in the specified year
+
+    BookSummary:
+      type: object
+      required:
+        - title
+        - author
+        - dateRead
+        - pages
+        - month
+      properties:
+        title:
+          type: string
+          description: Book title
+          example: "Co-Intelligence"
+        author:
+          type: string
+          description: Primary author name
+          example: "Ethan Mollick"
+        dateRead:
+          type: string
+          description: Completion date in YYYY/MM/DD format
+          example: "2025/09/19"
+        pages:
+          type: integer
+          description: Number of pages (may be 0)
+          example: 320
+        month:
+          type: integer
+          nullable: true
+          description: Month extracted from dateRead (1-12), null if only year available
+          minimum: 1
+          maximum: 12
+          example: 9
+
+    StatsResponse:
+      type: object
+      required:
+        - year
+        - totalBooks
+        - totalPages
+        - averagePerMonth
+        - monthlyBreakdown
+      properties:
+        year:
+          type: integer
+          description: Year these statistics are for
+          example: 2025
+        totalBooks:
+          type: integer
+          description: Total number of books read
+          example: 12
+        totalPages:
+          type: integer
+          description: Total pages read (excludes books with 0 pages)
+          example: 3240
+        averagePerMonth:
+          type: number
+          format: float
+          description: Average books per month (totalBooks / 12)
+          example: 1.0
+        monthlyBreakdown:
+          type: array
+          items:
+            $ref: '#/components/schemas/MonthlyCount'
+          description: Books completed per month (Jan-Dec)
+          minItems: 12
+          maxItems: 12
+
+    MonthlyCount:
+      type: object
+      required:
+        - month
+        - monthName
+        - count
+      properties:
+        month:
+          type: integer
+          description: Month number (1-12, where 1=January)
+          minimum: 1
+          maximum: 12
+          example: 9
+        monthName:
+          type: string
+          description: Short month name
+          enum: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+          example: "Sep"
+        count:
+          type: integer
+          description: Number of books completed in this month
+          minimum: 0
+          example: 3
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Human-readable error message
+          example: "Invalid year parameter"

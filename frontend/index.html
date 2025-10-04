@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reading Tracker 2025</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+</head>
+<body>
+    <header>
+        <h1>Reading Tracker <span id="current-year">2025</span></h1>
+        <select id="year-selector" aria-label="Select year">
+            <!-- Populated by JavaScript -->
+        </select>
+    </header>
+
+    <main>
+        <section id="statistics">
+            <div class="stat-card">
+                <h2>Total Books</h2>
+                <p class="stat-value" id="total-books">0</p>
+            </div>
+            <div class="stat-card">
+                <h2>Average per Month</h2>
+                <p class="stat-value" id="avg-per-month">0.0</p>
+            </div>
+            <div class="stat-card">
+                <h2>Total Pages</h2>
+                <p class="stat-value" id="total-pages">0</p>
+            </div>
+        </section>
+
+        <section id="chart-container">
+            <h2>Monthly Breakdown</h2>
+            <canvas id="monthly-chart"></canvas>
+        </section>
+
+        <section id="empty-state" class="hidden">
+            <p>No books tracked yet for <span id="empty-year"></span>. Start reading!</p>
+        </section>
+
+        <section id="error-state" class="hidden">
+            <p id="error-message">Unable to load reading data</p>
+        </section>
+    </main>
+
+    <script type="module" src="src/main.js"></script>
+</body>
+</html>

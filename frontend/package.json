@@ -1,0 +1,15 @@
+{
+  "name": "reading-tracker-frontend",
+  "version": "1.0.0",
+  "description": "Frontend for reading tracker application",
+  "type": "module",
+  "scripts": {
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "coverage": "vitest --coverage"
+  },
+  "devDependencies": {
+    "vitest": "^1.0.0",
+    "happy-dom": "^12.0.0"
+  }
+}
