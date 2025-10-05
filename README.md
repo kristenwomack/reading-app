@@ -142,4 +142,4 @@ See `.specify/memory/constitution.md` for full guidelines.
 
 ## License
 
-Personal project - all rights reserved.
+MIT License - see [LICENSE](LICENSE) file for details.
