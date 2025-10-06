@@ -16,33 +16,46 @@
     </header>
 
     <main>
-        <section id="statistics">
-            <div class="stat-card">
-                <h2>Total Books</h2>
-                <p class="stat-value" id="total-books">0</p>
-            </div>
-            <div class="stat-card">
-                <h2>Average per Month</h2>
-                <p class="stat-value" id="avg-per-month">0.0</p>
-            </div>
-            <div class="stat-card">
-                <h2>Total Pages</h2>
-                <p class="stat-value" id="total-pages">0</p>
-            </div>
-        </section>
+        <div class="dashboard-layout">
+            <aside class="summary-section">
+                <div class="summary-card">
+                    <h2 class="summary-title">2025 Summary</h2>
+                    <div class="stats-list">
+                        <!-- Stats populated by JavaScript -->
+                    </div>
+                </div>
+            </aside>
 
-        <section id="chart-container">
-            <h2>Monthly Breakdown</h2>
-            <canvas id="monthly-chart"></canvas>
-        </section>
+            <div class="charts-section">
+                <section id="statistics">
+                    <div class="stat-card">
+                        <h2>Total Books</h2>
+                        <p class="stat-value" id="total-books">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h2>Average per Month</h2>
+                        <p class="stat-value" id="avg-per-month">0.0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h2>Total Pages</h2>
+                        <p class="stat-value" id="total-pages">0</p>
+                    </div>
+                </section>
 
-        <section id="empty-state" class="hidden">
-            <p>No books tracked yet for <span id="empty-year"></span>. Start reading!</p>
-        </section>
+                <section id="chart-container">
+                    <h2>Monthly Breakdown</h2>
+                    <canvas id="monthly-chart"></canvas>
+                </section>
 
-        <section id="error-state" class="hidden">
-            <p id="error-message">Unable to load reading data</p>
-        </section>
+                <section id="empty-state" class="hidden">
+                    <p>No books tracked yet for <span id="empty-year"></span>. Start reading!</p>
+                </section>
+
+                <section id="error-state" class="hidden">
+                    <p id="error-message">Unable to load reading data</p>
+                </section>
+            </div>
+        </div>
     </main>
 
     <script type="module" src="src/main.js"></script>

@@ -22,6 +22,55 @@ export function updateStatistics(stats) {
     document.getElementById('current-year').textContent = stats.year;
 }
 
+// T011: Number formatting function
+export function formatNumber(num) {
+    return num.toLocaleString('en-US');
+}
+
+// T010: Render summary card with reading statistics
+export function renderSummaryCard(stats) {
+    const summaryCard = document.querySelector('.summary-card');
+    if (!summaryCard) return;
+
+    // Update title
+    const summaryTitle = summaryCard.querySelector('.summary-title');
+    if (summaryTitle) {
+        summaryTitle.textContent = `${stats.year} Summary`;
+    }
+
+    // Handle empty state (0 books)
+    if (stats.totalBooks === 0) {
+        summaryCard.classList.add('empty-state');
+        summaryCard.querySelector('.stats-list').innerHTML = `
+            <p class="empty-message">No books tracked for this year</p>
+        `;
+        return;
+    }
+
+    // Remove empty state class if it exists
+    summaryCard.classList.remove('empty-state');
+
+    // Render stat rows
+    const statsList = summaryCard.querySelector('.stats-list');
+    if (statsList) {
+        statsList.innerHTML = `
+            <div class="stat-row">
+                <span class="stat-label">Total Books</span>
+                <span class="stat-value">${stats.totalBooks}</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Total Pages</span>
+                <span class="stat-value">${formatNumber(stats.totalPages)}</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Avg Pages/Book</span>
+                <span class="stat-value">${stats.averagePagesPerBook || Math.floor(stats.totalPages / stats.totalBooks)}</span>
+            </div>
+        `;
+    }
+}
+
+
 export function showEmptyState(year) {
     document.getElementById('statistics').style.display = 'none';
     document.getElementById('chart-container').style.display = 'none';

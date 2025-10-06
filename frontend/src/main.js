@@ -1,11 +1,14 @@
 // Main application entry point
 import { fetchYears, fetchStats } from './api-client.js';
 import { renderChart } from './chart.js';
-import { populateYearSelector, updateStatistics, showEmptyState, showError, showContent } from './ui.js';
+import { populateYearSelector, updateStatistics, renderSummaryCard, showEmptyState, showError, showContent } from './ui.js';
 
 async function loadYearData(year) {
     try {
         const stats = await fetchStats(year);
+        
+        // T012: Always render summary card with stats
+        renderSummaryCard(stats);
         
         if (stats.totalBooks === 0) {
             showEmptyState(year);
