@@ -44,7 +44,6 @@ Build a reading progress tracker with a Go API backend serving book data and a s
 
 ## Constitution Check
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
-
 ### I. Monorepo Structure ✅ PASS
 - Backend workspace: `/backend` (Go service with net/http)
 - Frontend workspace: `/frontend` (Static HTML/CSS/JS)

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connection Diagnostic</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        .pass { background: #d4edda; border-color: #c3e6cb; }
+        .fail { background: #f8d7da; border-color: #f5c6cb; }
+        .pending { background: #fff3cd; border-color: #ffeaa7; }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Reading Tracker Connection Diagnostic</h1>
+    
+    <div id="results"></div>
+    
+    <script>
+        const results = document.getElementById('results');
+        
+        function addTest(name, status, message, details = null) {
+            const div = document.createElement('div');
+            div.className = `test ${status}`;
+            div.innerHTML = `
+                <h3>${status === 'pass' ? '✅' : status === 'fail' ? '❌' : '⏳'} ${name}</h3>
+                <p>${message}</p>
+                ${details ? `<pre>${details}</pre>` : ''}
+            `;
+            results.appendChild(div);
+        }
+        
+        // Test 1: Basic browser info
+        addTest(
+            'Browser Information',
+            'pass',
+            `Using: ${navigator.userAgent}`,
+            `Protocol: ${window.location.protocol}\nHost: ${window.location.host}\nCookies enabled: ${navigator.cookieEnabled}`
+        );
+        
+        // Test 2: Fetch API availability
+        if (typeof fetch !== 'undefined') {
+            addTest('Fetch API', 'pass', 'Fetch API is available');
+        } else {
+            addTest('Fetch API', 'fail', 'Fetch API is NOT available');
+        }
+        
+        // Test 3: Try to connect to API
+        async function testAPI() {
+            try {
+                addTest('API Connection', 'pending', 'Testing connection to /api/years...');
+                
+                const response = await fetch('http://localhost:3000/api/years');
+                const data = await response.json();
+                
+                results.removeChild(results.lastChild);
+                addTest(
+                    'API Connection',
+                    'pass',
+                    'Successfully connected to API!',
+                    `Response: ${JSON.stringify(data, null, 2)}`
+                );
+                
+                // Test 4: Test main page
+                testMainPage();
+            } catch (error) {
+                results.removeChild(results.lastChild);
+                addTest(
+                    'API Connection',
+                    'fail',
+                    `Failed to connect: ${error.message}`,
+                    `Error type: ${error.name}\nStack: ${error.stack}`
+                );
+            }
+        }
+        
+        async function testMainPage() {
+            try {
+                addTest('Main Page', 'pending', 'Testing connection to main page...');
+                
+                const response = await fetch('http://localhost:3000/');
+                const html = await response.text();
+                
+                results.removeChild(results.lastChild);
+                addTest(
+                    'Main Page',
+                    'pass',
+                    'Successfully loaded main page!',
+                    `HTML length: ${html.length} bytes\nStarts with: ${html.substring(0, 100)}...`
+                );
+            } catch (error) {
+                results.removeChild(results.lastChild);
+                addTest(
+                    'Main Page',
+                    'fail',
+                    `Failed to load main page: ${error.message}`
+                );
+            }
+        }
+        
+        // Run tests
+        testAPI();
+        
+        // Test 5: Console check
+        console.log('🔍 Diagnostic page loaded. Check console for any errors.');
+        addTest(
+            'Console Check',
+            'pass',
+            'Check browser console (F12) for additional debugging info'
+        );
+    </script>
+</body>
+</html>
