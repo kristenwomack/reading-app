@@ -15,5 +15,10 @@ books.db
 books.db-wal
 books.db-shm
 
+# Environment (contains secrets)
+.env
+.env.local
+.env.production
+
 # OS files
 .DS_Store
