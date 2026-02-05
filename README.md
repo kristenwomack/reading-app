@@ -1,145 +1,141 @@
 # 📚 Reading Tracker
 
-A personal reading progress tracker built with Go and vanilla JavaScript.
+A personal reading tracker with a modern dashboard and mobile-friendly admin for logging books on the go.
 
 ## Features
 
-- 📊 **Interactive Dashboard** - Visualize your reading progress with Chart.js
-- 📅 **Year Selector** - Browse reading data by year
-- 📈 **Statistics** - Track total books, pages, and monthly breakdowns
-- 🎨 **Clean UI** - Minimal, responsive design
+- 📊 **Dashboard** - Visualize reading progress with charts and statistics
+- 📖 **Book List** - Browse books with covers, linked to Open Library
+- 🎯 **Reading Goals** - Set yearly book targets with progress tracking
+- ✏️ **Admin Panel** - Add books from any device with password protection
+- 📷 **ISBN Scanner** - Scan barcodes to auto-fill book details
+- 🔍 **Open Library Integration** - Fetch book info and covers automatically
 
-## Architecture
+## Screenshots
 
-### Monorepo Structure
-```
-reading-app/
-├── backend/              # Go API server
-│   ├── internal/
-│   │   ├── books/       # Book loading, filtering, and stats
-│   │   └── handlers/    # HTTP request handlers
-│   └── main.go          # Server entry point with CORS
-├── frontend/            # Vanilla JavaScript frontend
-│   ├── src/
-│   │   ├── api-client.js    # API communication
-│   │   ├── chart.js         # Chart.js integration
-│   │   ├── ui.js            # DOM manipulation
-│   │   └── main.js          # Application entry point
-│   ├── styles/
-│   │   └── main.css         # Styling
-│   └── index.html
-├── shared/
-│   └── contracts/       # OpenAPI specifications
-└── books.json           # Reading data (repository root)
-```
-
-### Tech Stack
-
-**Backend:**
-- Go 1.21+ with standard library
-- No external dependencies (stdlib only)
-- RESTful API design
-
-**Frontend:**
-- Vanilla JavaScript (ES6+)
-- Chart.js for visualizations
-- No frameworks - pure HTML/CSS/JS
-
-**Data:**
-- JSON file storage (no database)
-- No authentication (local single-user app)
-
-### API Endpoints
-
-```
-GET /api/years              # List available years
-GET /api/books?year=2025    # Get books for specific year
-GET /api/stats?year=2025    # Get statistics for specific year
-```
-
-### Key Design Decisions
-
-1. **CORS Support** - Middleware allows browser access from any origin
-2. **Port 3000** - Runs on http://localhost:3000
-3. **Minimal Dependencies** - Go stdlib + Chart.js only
-4. **Static File Serving** - Backend serves frontend files
-5. **TDD Approach** - Complete test coverage for all modules
+The dashboard shows your reading stats, a monthly chart, goal progress, and a list of books read.
 
 ## Quick Start
 
 ### Prerequisites
 - Go 1.21 or later
-- Modern web browser
 
-### Running Locally
-
-1. **Navigate to backend:**
-   ```bash
-   cd backend
-   ```
-
-2. **Run the server:**
-   ```bash
-   ./reading-tracker
-   ```
-   
-   Or build first:
-   ```bash
-   go build -o reading-tracker main.go
-   ./reading-tracker
-   ```
-
-3. **Open in browser:**
-   ```
-   http://localhost:3000
-   ```
-
-### Running Tests
+### Run the App
 
 ```bash
 cd backend
-go test ./...
+READING_APP_PASSWORD=yourpassword go run main.go
 ```
+
+Open http://localhost:3000 in your browser.
+
+### Add Books
+
+1. Go to http://localhost:3000/admin
+2. Enter your password
+3. Add books manually or scan an ISBN barcode
+
+## Project Structure
+
+```
+reading-app/
+├── backend/                  # Go API server
+│   ├── internal/
+│   │   ├── auth/            # JWT authentication
+│   │   ├── books/           # Book loading, filtering, stats
+│   │   ├── handlers/        # HTTP request handlers
+│   │   └── store/           # SQLite database layer
+│   └── main.go              # Server entry point
+├── frontend/                 # Vanilla JavaScript frontend
+│   ├── src/
+│   │   ├── admin.js         # Admin page functionality
+│   │   ├── api-client.js    # API communication
+│   │   ├── chart.js         # Chart.js integration
+│   │   ├── main.js          # Dashboard logic
+│   │   └── ui.js            # DOM manipulation
+│   ├── styles/
+│   │   ├── main.css         # Dashboard styles
+│   │   └── admin.css        # Admin page styles
+│   ├── index.html           # Dashboard
+│   └── admin.html           # Admin panel
+├── books.json                # Initial book data (imported on first run)
+└── books.db                  # SQLite database (created automatically)
+```
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| Backend | Go with standard library + SQLite |
+| Frontend | Vanilla JavaScript, HTML, CSS |
+| Charts | Chart.js |
+| Database | SQLite (via modernc.org/sqlite) |
+| Auth | JWT tokens with bcrypt |
+| Book Data | Open Library API |
+
+## API Endpoints
+
+### Public
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/years` | List available years |
+| GET | `/api/books?year=2025` | Get books for year |
+| GET | `/api/books?year=2025&shelf=read` | Filter by shelf |
+| GET | `/api/stats?year=2025` | Get statistics |
+| GET | `/api/goals/:year` | Get reading goal |
+
+### Protected (requires auth)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/books` | Add a book |
+| PUT | `/api/books/:id` | Update a book |
+| DELETE | `/api/books/:id` | Delete a book |
+| POST | `/api/goals` | Set reading goal |
+| POST | `/api/auth/login` | Login |
+| POST | `/api/auth/logout` | Logout |
+
+## Configuration
+
+| Environment Variable | Description | Default |
+|---------------------|-------------|---------|
+| `READING_APP_PASSWORD` | Password for admin access | (required) |
 
 ## Development
 
-### Backend Development
+### Run Backend
 ```bash
 cd backend
-go test ./...              # Run tests
-go build -o reading-tracker main.go   # Build binary
+go run main.go
 ```
 
-### Frontend Development
-Frontend files are served by the Go backend. Simply refresh the browser to see changes.
+### Run Tests
+```bash
+cd backend && go test ./...
+cd frontend && npm test
+```
 
-## Project Structure Details
+### Build for Production
+```bash
+cd backend
+go build -o reading-tracker main.go
+READING_APP_PASSWORD=secret ./reading-tracker
+```
 
-### Backend Modules
+## Deployment
 
-- **`internal/books/loader.go`** - Loads books from JSON file
-- **`internal/books/filter.go`** - Filters books by year and other criteria
-- **`internal/books/stats.go`** - Calculates reading statistics and monthly breakdowns
-- **`internal/handlers/handlers.go`** - HTTP handlers for API endpoints
+For remote access, use a reverse proxy like Caddy for automatic HTTPS:
 
-### Frontend Modules
+```
+# Caddyfile
+books.yourdomain.com {
+    reverse_proxy localhost:3000
+}
+```
 
-- **`src/api-client.js`** - Fetches data from backend API
-- **`src/chart.js`** - Creates Chart.js visualizations
-- **`src/ui.js`** - Updates DOM with data
-- **`src/main.js`** - Initializes app and coordinates modules
+## Data Migration
 
-## Constitution
-
-This project follows a constitution-based development approach:
-- ✅ Monorepo structure
-- ✅ Minimal dependencies
-- ✅ Test-driven development
-- ✅ Go + vanilla JavaScript
-- ✅ No databases, no authentication
-
-See `.specify/memory/constitution.md` for full guidelines.
+On first run, the app automatically imports `books.json` into SQLite. After that, all data is stored in `books.db`.
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+MIT License - see [LICENSE](LICENSE) for details.
