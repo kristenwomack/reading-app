@@ -27,6 +27,18 @@
             </aside>
 
             <div class="charts-section">
+                <!-- Goal Progress (hidden if no goal set) -->
+                <section id="goal-progress" class="hidden">
+                    <div class="goal-header">
+                        <h2 id="goal-title">2025 Goal</h2>
+                        <span id="goal-stats">0 of 0 books</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                    </div>
+                    <p class="goal-percent" id="goal-percent">0% complete</p>
+                </section>
+
                 <section id="statistics">
                     <div class="stat-card">
                         <h2>Total Books</h2>
@@ -136,10 +148,51 @@
             return div.innerHTML;
         }
         
+        // Goal progress loader
+        function loadGoalProgress() {
+            var year = document.getElementById('year-selector').value || 2025;
+            
+            fetch('/api/goals/' + year)
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    var goalSection = document.getElementById('goal-progress');
+                    
+                    if (!data.target) {
+                        goalSection.classList.add('hidden');
+                        return;
+                    }
+                    
+                    // Get current book count from stats
+                    fetch('/api/stats?year=' + year)
+                        .then(function(r) { return r.json(); })
+                        .then(function(stats) {
+                            var current = stats.totalBooks || 0;
+                            var target = data.target;
+                            var percent = Math.min(100, Math.round((current / target) * 100));
+                            
+                            document.getElementById('goal-title').textContent = year + ' Goal';
+                            document.getElementById('goal-stats').textContent = current + ' of ' + target + ' books';
+                            document.getElementById('progress-fill').style.width = percent + '%';
+                            document.getElementById('goal-percent').textContent = percent + '% complete';
+                            
+                            goalSection.classList.remove('hidden');
+                        });
+                })
+                .catch(function(e) {
+                    document.getElementById('goal-progress').classList.add('hidden');
+                });
+        }
+        
         window.addEventListener('load', function() {
-            setTimeout(loadBooks, 500);
+            setTimeout(function() {
+                loadBooks();
+                loadGoalProgress();
+            }, 500);
             document.getElementById('year-selector').addEventListener('change', function() {
-                setTimeout(loadBooks, 100);
+                setTimeout(function() {
+                    loadBooks();
+                    loadGoalProgress();
+                }, 100);
             });
         });
     </script>

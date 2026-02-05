@@ -104,6 +104,24 @@
                 <p id="form-message" class="hidden"></p>
             </section>
 
+            <!-- Reading Goal Section -->
+            <section class="form-card">
+                <h2>Reading Goal</h2>
+                <form id="goal-form">
+                    <div class="form-row goal-row">
+                        <label for="goal-year">Year</label>
+                        <select id="goal-year" name="year">
+                            <!-- Populated by JavaScript -->
+                        </select>
+                        <label for="goal-target">Goal</label>
+                        <input type="number" id="goal-target" name="target" min="1" max="500" placeholder="52">
+                        <span class="goal-label">books</span>
+                        <button type="submit" class="btn-primary btn-small">Save</button>
+                    </div>
+                </form>
+                <p id="goal-message" class="hidden"></p>
+            </section>
+
             <!-- Barcode Scanner Modal -->
             <div id="scanner-modal" class="modal hidden">
                 <div class="modal-content">

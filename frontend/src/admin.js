@@ -60,6 +60,86 @@ function showLoginScreen() {
 function showAdminScreen() {
     loginScreen.classList.add('hidden');
     adminScreen.classList.remove('hidden');
+    setupGoalForm();
+}
+
+// Setup goal form
+async function setupGoalForm() {
+    const yearSelect = document.getElementById('goal-year');
+    const targetInput = document.getElementById('goal-target');
+    const goalForm = document.getElementById('goal-form');
+    
+    if (!yearSelect || !goalForm) return;
+    
+    // Populate years (current year and next few years)
+    const currentYear = new Date().getFullYear();
+    yearSelect.innerHTML = '';
+    for (let y = currentYear - 1; y <= currentYear + 2; y++) {
+        const option = document.createElement('option');
+        option.value = y;
+        option.textContent = y;
+        if (y === currentYear) option.selected = true;
+        yearSelect.appendChild(option);
+    }
+    
+    // Load current goal
+    await loadGoal(currentYear);
+    
+    // Handle year change
+    yearSelect.addEventListener('change', () => {
+        loadGoal(parseInt(yearSelect.value));
+    });
+    
+    // Handle form submit
+    goalForm.addEventListener('submit', handleSetGoal);
+}
+
+async function loadGoal(year) {
+    const targetInput = document.getElementById('goal-target');
+    try {
+        const response = await fetch(`${API_BASE}/goals/${year}`);
+        const data = await response.json();
+        targetInput.value = data.target || '';
+    } catch (error) {
+        console.error('Failed to load goal:', error);
+    }
+}
+
+async function handleSetGoal(e) {
+    e.preventDefault();
+    
+    const year = parseInt(document.getElementById('goal-year').value);
+    const target = parseInt(document.getElementById('goal-target').value);
+    const message = document.getElementById('goal-message');
+    
+    if (!target || target < 1) {
+        showGoalMessage('Please enter a valid goal', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE}/goals`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ year, target })
+        });
+        
+        if (response.ok) {
+            showGoalMessage(`Goal set: ${target} books for ${year}`, 'success');
+        } else {
+            showGoalMessage('Failed to save goal', 'error');
+        }
+    } catch (error) {
+        showGoalMessage('Failed to save goal', 'error');
+    }
+}
+
+function showGoalMessage(text, type) {
+    const message = document.getElementById('goal-message');
+    message.textContent = text;
+    message.className = type;
+    message.classList.remove('hidden');
+    setTimeout(() => message.classList.add('hidden'), 3000);
 }
 
 // Setup all event listeners

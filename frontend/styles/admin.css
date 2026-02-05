@@ -262,6 +262,62 @@ details summary:hover {
     background: #f8d7da;
 }
 
+/* Goal Form */
+.goal-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.goal-row label {
+    font-weight: 500;
+    color: #7f8c8d;
+}
+
+.goal-row select,
+.goal-row input {
+    padding: 10px 14px;
+    font-size: 1rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    width: auto;
+}
+
+.goal-row select {
+    min-width: 100px;
+}
+
+.goal-row input {
+    width: 80px;
+    text-align: center;
+}
+
+.goal-label {
+    color: #7f8c8d;
+}
+
+.btn-small {
+    padding: 10px 20px !important;
+}
+
+#goal-message {
+    margin-top: 12px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+#goal-message.success {
+    background: #d4edda;
+    color: #27ae60;
+}
+
+#goal-message.error {
+    background: #f8d7da;
+    color: #e74c3c;
+}
+
 /* Scanner Modal */
 .modal {
     position: fixed;

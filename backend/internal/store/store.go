@@ -89,6 +89,12 @@ func (s *Store) migrate() error {
 		key TEXT PRIMARY KEY,
 		value TEXT NOT NULL
 	);
+
+	CREATE TABLE IF NOT EXISTS goals (
+		year INTEGER PRIMARY KEY,
+		book_target INTEGER NOT NULL,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+	);
 	`
 	_, err := s.db.Exec(schema)
 	return err
@@ -209,4 +215,32 @@ func (s *Store) BookCount() (int, error) {
 	var count int
 	err := s.db.QueryRow("SELECT COUNT(*) FROM books").Scan(&count)
 	return count, err
+}
+
+// Goal represents a yearly reading goal
+type Goal struct {
+	Year       int
+	BookTarget int
+}
+
+// GetGoal returns the goal for a specific year
+func (s *Store) GetGoal(year int) (*Goal, error) {
+	var g Goal
+	err := s.db.QueryRow("SELECT year, book_target FROM goals WHERE year = ?", year).Scan(&g.Year, &g.BookTarget)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &g, nil
+}
+
+// SetGoal creates or updates a goal for a year
+func (s *Store) SetGoal(year, bookTarget int) error {
+	_, err := s.db.Exec(`
+		INSERT INTO goals (year, book_target) VALUES (?, ?)
+		ON CONFLICT(year) DO UPDATE SET book_target = excluded.book_target
+	`, year, bookTarget)
+	return err
 }

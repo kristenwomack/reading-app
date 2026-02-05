@@ -158,6 +158,56 @@ main {
     margin-bottom: 12px;
 }
 
+/* Goal Progress */
+#goal-progress {
+    background: var(--color-surface);
+    padding: 24px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    margin-bottom: 24px;
+}
+
+.goal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.goal-header h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin: 0;
+}
+
+#goal-stats {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+}
+
+.progress-bar {
+    height: 12px;
+    background: var(--color-border-light);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--color-accent) 0%, #60a5fa 100%);
+    border-radius: 6px;
+    transition: width 0.5s ease;
+}
+
+.goal-percent {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    margin-top: 10px;
+    text-align: right;
+}
+
 /* Stats Cards */
 #statistics {
     display: grid;

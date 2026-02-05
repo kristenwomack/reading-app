@@ -237,3 +237,67 @@ func ExportBooks(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Disposition", "attachment; filename=books.json")
 	json.NewEncoder(w).Encode(books)
 }
+
+// GetGoal handles GET /api/goals/:year
+func GetGoal(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Extract year from path
+	path := strings.TrimPrefix(r.URL.Path, "/api/goals/")
+	year, err := strconv.Atoi(path)
+	if err != nil {
+		http.Error(w, "Invalid year", http.StatusBadRequest)
+		return
+	}
+
+	goal, err := dataStore.GetGoal(year)
+	if err != nil {
+		http.Error(w, "Failed to get goal", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if goal == nil {
+		json.NewEncoder(w).Encode(map[string]interface{}{"year": year, "target": nil})
+	} else {
+		json.NewEncoder(w).Encode(map[string]interface{}{"year": goal.Year, "target": goal.BookTarget})
+	}
+}
+
+// SetGoal handles POST /api/goals
+func SetGoal(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req struct {
+		Year   int `json:"year"`
+		Target int `json:"target"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
+	if req.Year < 2000 || req.Year > 2100 {
+		http.Error(w, "Invalid year", http.StatusBadRequest)
+		return
+	}
+
+	if req.Target < 0 {
+		http.Error(w, "Target must be positive", http.StatusBadRequest)
+		return
+	}
+
+	if err := dataStore.SetGoal(req.Year, req.Target); err != nil {
+		http.Error(w, "Failed to set goal", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]bool{"success": true})
+}

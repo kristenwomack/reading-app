@@ -87,6 +87,10 @@ func main() {
 	})
 	http.HandleFunc("/api/stats", handlers.GetStats)
 	
+	// Goals routes
+	http.HandleFunc("/api/goals/", handlers.GetGoal)
+	http.HandleFunc("/api/goals", handlers.AuthMiddleware(handlers.SetGoal))
+	
 	// Auth routes
 	http.HandleFunc("/api/auth/login", handlers.Login)
 	http.HandleFunc("/api/auth/logout", handlers.Logout)
