@@ -10,5 +10,10 @@ backend/testdata/
 node_modules/
 frontend/node_modules/
 
+# Database
+books.db
+books.db-wal
+books.db-shm
+
 # OS files
 .DS_Store

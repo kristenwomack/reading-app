@@ -7,7 +7,7 @@ import (
 // T012: TestLoadBooks verifies that books can be loaded from a JSON file
 func TestLoadBooks(t *testing.T) {
 	// Given a valid test data file
-	filepath := "../testdata/books_test.json"
+	filepath := "../../testdata/books_test.json"
 	
 	// When loading books
 	books, err := LoadBooks(filepath)
@@ -37,7 +37,7 @@ func TestLoadBooks(t *testing.T) {
 // T012: TestLoadBooksFileNotFound verifies error handling when file doesn't exist
 func TestLoadBooksFileNotFound(t *testing.T) {
 	// Given a non-existent file path
-	filepath := "../testdata/nonexistent.json"
+	filepath := "../../testdata/nonexistent.json"
 	
 	// When trying to load books
 	books, err := LoadBooks(filepath)
@@ -56,7 +56,7 @@ func TestLoadBooksFileNotFound(t *testing.T) {
 // T012: TestLoadBooksInvalidJSON verifies error handling for malformed JSON
 func TestLoadBooksInvalidJSON(t *testing.T) {
 	// Given a file with invalid JSON
-	filepath := "../testdata/invalid.json"
+	filepath := "../../testdata/invalid.json"
 	
 	// When trying to load books
 	books, err := LoadBooks(filepath)

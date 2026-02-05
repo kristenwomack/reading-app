@@ -47,6 +47,17 @@
                     <canvas id="monthly-chart"></canvas>
                 </section>
 
+                <!-- Book List Section -->
+                <section id="book-list-section">
+                    <div class="book-list-header">
+                        <h2>Books Read</h2>
+                        <span id="book-count" class="book-count"></span>
+                    </div>
+                    <div id="book-list" class="book-grid">
+                        <p style="color: #7f8c8d; text-align: center; padding: 20px;">Loading books...</p>
+                    </div>
+                </section>
+
                 <section id="empty-state" class="hidden">
                     <p>No books tracked yet for <span id="empty-year"></span>. Start reading!</p>
                 </section>
@@ -59,5 +70,78 @@
     </main>
 
     <script type="module" src="src/main.js"></script>
+    <script>
+        // Book list loader
+        function loadBooks() {
+            var bookList = document.getElementById('book-list');
+            var year = document.getElementById('year-selector').value || 2025;
+            
+            fetch('/api/books?year=' + year + '&shelf=read')
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    var books = data.books || [];
+                    var countEl = document.getElementById('book-count');
+                    if (countEl) countEl.textContent = books.length + ' book' + (books.length !== 1 ? 's' : '');
+                    
+                    if (books.length === 0) {
+                        bookList.innerHTML = '<p class="no-books">No books read this year yet.</p>';
+                    } else {
+                        bookList.innerHTML = books.map(function(b) {
+                            var isbn = b.isbn || '';
+                            var coverUrl = b.coverUrl || '';
+                            var openLibUrl = isbn 
+                                ? 'https://openlibrary.org/isbn/' + isbn 
+                                : 'https://openlibrary.org/search?q=' + encodeURIComponent(b.title + ' ' + b.author);
+                            var dateStr = formatBookDate(b.dateRead);
+                            var pages = b.pages > 0 ? b.pages + ' pages' : '';
+                            
+                            var coverHtml = coverUrl 
+                                ? '<img src="' + coverUrl + '" alt="" class="book-cover" loading="lazy" onerror="this.parentElement.innerHTML=\'<div class=book-cover-placeholder>📚</div>\'">'
+                                : '<div class="book-cover-placeholder">📚</div>';
+                            
+                            return '<a href="' + openLibUrl + '" target="_blank" rel="noopener" class="book-card">' +
+                                '<div class="book-cover-wrap">' + coverHtml + '</div>' +
+                                '<div class="book-info">' +
+                                '<div class="book-title">' + escapeBookHtml(b.title) + '</div>' +
+                                '<div class="book-author">by ' + escapeBookHtml(b.author) + '</div>' +
+                                '<div class="book-meta">' +
+                                (pages ? '<span class="book-pages">📖 ' + pages + '</span>' : '') +
+                                (dateStr ? '<span class="book-date">📅 ' + dateStr + '</span>' : '') +
+                                '</div>' +
+                                '</div></a>';
+                        }).join('');
+                    }
+                })
+                .catch(function(e) {
+                    bookList.innerHTML = '<p style="color:#e74c3c;">Failed to load books</p>';
+                });
+        }
+        
+        function formatBookDate(dateStr) {
+            if (!dateStr) return '';
+            var parts = dateStr.split('/');
+            if (parts.length >= 2) {
+                var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                var month = parseInt(parts[1]) - 1;
+                var day = parts[2] ? parseInt(parts[2]) : '';
+                return day ? months[month] + ' ' + day : months[month];
+            }
+            return dateStr;
+        }
+        
+        function escapeBookHtml(text) {
+            if (!text) return '';
+            var div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        window.addEventListener('load', function() {
+            setTimeout(loadBooks, 500);
+            document.getElementById('year-selector').addEventListener('change', function() {
+                setTimeout(loadBooks, 100);
+            });
+        });
+    </script>
 </body>
 </html>

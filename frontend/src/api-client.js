@@ -9,8 +9,15 @@ export async function fetchYears() {
     return response.json();
 }
 
-export async function fetchBooks(year) {
-    const response = await fetch(`${API_BASE}/books?year=${year}`);
+export async function fetchBooks(year, options = {}) {
+    let url = `${API_BASE}/books?year=${year}`;
+    if (options.shelf) {
+        url += `&shelf=${encodeURIComponent(options.shelf)}`;
+    }
+    if (options.month) {
+        url += `&month=${options.month}`;
+    }
+    const response = await fetch(url);
     if (!response.ok) {
         throw new Error('Failed to fetch books');
     }

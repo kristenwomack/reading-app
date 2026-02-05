@@ -1,0 +1,384 @@
+/* Admin Page Styles */
+
+/* Login Screen */
+#login-screen {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.login-card {
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    text-align: center;
+    max-width: 400px;
+    width: 100%;
+}
+
+.login-card h1 {
+    margin-bottom: 10px;
+}
+
+.login-card p {
+    color: #7f8c8d;
+    margin-bottom: 30px;
+}
+
+#login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+#login-form input {
+    padding: 15px;
+    font-size: 1rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    text-align: center;
+}
+
+#login-form input:focus {
+    border-color: #3498db;
+    outline: none;
+}
+
+#login-form button {
+    padding: 15px;
+    font-size: 1rem;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+#login-form button:hover {
+    background: #2980b9;
+}
+
+/* Admin Screen */
+#admin-screen header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+#admin-screen header nav {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+#admin-screen header nav a {
+    color: #3498db;
+    text-decoration: none;
+}
+
+#admin-screen header nav a:hover {
+    text-decoration: underline;
+}
+
+.btn-link {
+    background: none;
+    border: none;
+    color: #e74c3c;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.btn-link:hover {
+    text-decoration: underline;
+}
+
+/* Form Card */
+.form-card {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.form-card h2 {
+    margin-bottom: 20px;
+    color: #2c3e50;
+}
+
+.form-row {
+    margin-bottom: 15px;
+}
+
+.form-row.two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+@media (max-width: 500px) {
+    .form-row.two-col {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.form-group label {
+    font-size: 0.9rem;
+    color: #7f8c8d;
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 12px;
+    font-size: 1rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: #3498db;
+    outline: none;
+}
+
+.input-with-button {
+    display: flex;
+    gap: 5px;
+}
+
+.input-with-button input {
+    flex: 1;
+}
+
+.input-with-button button {
+    padding: 12px;
+    font-size: 1.2rem;
+    background: #f0f0f0;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.input-with-button button:hover {
+    background: #e0e0e0;
+}
+
+/* Details/Summary */
+details {
+    margin: 20px 0;
+}
+
+details summary {
+    cursor: pointer;
+    color: #3498db;
+    font-weight: 500;
+    padding: 10px 0;
+}
+
+details summary:hover {
+    text-decoration: underline;
+}
+
+.details-content {
+    padding-top: 15px;
+}
+
+/* Form Actions */
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn-primary {
+    padding: 15px 30px;
+    font-size: 1rem;
+    background: #27ae60;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    flex: 1;
+}
+
+.btn-primary:hover {
+    background: #219a52;
+}
+
+.btn-secondary {
+    padding: 15px 30px;
+    font-size: 1rem;
+    background: #ecf0f1;
+    color: #7f8c8d;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.btn-secondary:hover {
+    background: #bdc3c7;
+}
+
+/* Messages */
+.error {
+    color: #e74c3c;
+    font-size: 0.9rem;
+}
+
+.success {
+    color: #27ae60;
+    font-size: 0.9rem;
+}
+
+#form-message {
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+#form-message.success {
+    background: #d4edda;
+}
+
+#form-message.error {
+    background: #f8d7da;
+}
+
+/* Scanner Modal */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    text-align: center;
+    max-width: 90%;
+    width: 400px;
+}
+
+.modal-content h3 {
+    margin-bottom: 20px;
+}
+
+#scanner-container {
+    background: #000;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 15px;
+}
+
+#scanner-video {
+    width: 100%;
+    max-height: 300px;
+}
+
+#scanner-status {
+    color: #7f8c8d;
+    margin-bottom: 15px;
+}
+
+/* Recent Books */
+.recent-books {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.recent-books h2 {
+    margin-bottom: 20px;
+    color: #2c3e50;
+}
+
+#recent-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.recent-book {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.recent-book img {
+    width: 40px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+    background: #e0e0e0;
+}
+
+.recent-book-info {
+    flex: 1;
+}
+
+.recent-book-title {
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+.recent-book-author {
+    font-size: 0.9rem;
+    color: #7f8c8d;
+}
+
+.recent-book-date {
+    font-size: 0.85rem;
+    color: #95a5a6;
+}
+
+/* Cover Preview */
+#cover-preview {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: white;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+#cover-preview img {
+    max-width: 120px;
+    max-height: 180px;
+    border-radius: 4px;
+}
+
+/* Hidden utility */
+.hidden {
+    display: none !important;
+}

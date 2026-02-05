@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Book - Reading Tracker</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/admin.css">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="login-screen">
+        <div class="login-card">
+            <h1>📚 Reading Tracker</h1>
+            <p>Enter your password to add books</p>
+            <form id="login-form">
+                <input type="password" id="password" placeholder="Password" required autocomplete="current-password">
+                <button type="submit">Login</button>
+                <p id="login-error" class="error hidden"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Screen (hidden until authenticated) -->
+    <div id="admin-screen" class="hidden">
+        <header>
+            <h1>📚 Add Book</h1>
+            <nav>
+                <a href="/">← Dashboard</a>
+                <button id="logout-btn" class="btn-link">Logout</button>
+            </nav>
+        </header>
+
+        <main>
+            <!-- Quick Add Form -->
+            <section class="form-card">
+                <h2>Quick Add</h2>
+                <form id="quick-add-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="title">Title *</label>
+                            <input type="text" id="title" name="title" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="author">Author *</label>
+                            <input type="text" id="author" name="author" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="dateRead">Date Read</label>
+                            <input type="date" id="dateRead" name="dateRead">
+                        </div>
+                    </div>
+                    
+                    <!-- Expandable Details -->
+                    <details id="more-details">
+                        <summary>More Details</summary>
+                        <div class="details-content">
+                            <div class="form-row two-col">
+                                <div class="form-group">
+                                    <label for="pages">Pages</label>
+                                    <input type="number" id="pages" name="pages" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="yearPublished">Year Published</label>
+                                    <input type="number" id="yearPublished" name="yearPublished" min="1000" max="2100">
+                                </div>
+                            </div>
+                            <div class="form-row two-col">
+                                <div class="form-group">
+                                    <label for="isbn">ISBN</label>
+                                    <div class="input-with-button">
+                                        <input type="text" id="isbn" name="isbn" placeholder="Scan or enter ISBN">
+                                        <button type="button" id="scan-btn" title="Scan barcode">📷</button>
+                                        <button type="button" id="lookup-btn" title="Lookup book info">🔍</button>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="shelf">Shelf</label>
+                                    <select id="shelf" name="shelf">
+                                        <option value="read" selected>Read</option>
+                                        <option value="currently-reading">Currently Reading</option>
+                                        <option value="to-read">To Read</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="review">Notes / Review</label>
+                                    <textarea id="review" name="review" rows="3"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">Add Book</button>
+                        <button type="reset" class="btn-secondary">Clear</button>
+                    </div>
+                </form>
+                <p id="form-message" class="hidden"></p>
+            </section>
+
+            <!-- Barcode Scanner Modal -->
+            <div id="scanner-modal" class="modal hidden">
+                <div class="modal-content">
+                    <h3>Scan ISBN Barcode</h3>
+                    <div id="scanner-container">
+                        <video id="scanner-video" playsinline></video>
+                    </div>
+                    <p id="scanner-status">Position barcode in view...</p>
+                    <button type="button" id="cancel-scan" class="btn-secondary">Cancel</button>
+                </div>
+            </div>
+
+            <!-- Recent Books -->
+            <section class="recent-books">
+                <h2>Recently Added</h2>
+                <div id="recent-list">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </section>
+
+            <!-- Book Cover Preview -->
+            <div id="cover-preview" class="hidden">
+                <img id="cover-image" alt="Book cover">
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2@1.8.4/dist/quagga.min.js"></script>
+    <script type="module" src="src/admin.js"></script>
+</body>
+</html>
