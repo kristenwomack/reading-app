@@ -10,10 +10,16 @@ import (
 )
 
 var cachedBooks []books.Book
+var frontendDir string = "../frontend" // default for local dev
 
 // SetBooks sets the cached books for handlers to use (legacy support)
 func SetBooks(b []books.Book) {
 	cachedBooks = b
+}
+
+// SetFrontendDir sets the frontend directory path
+func SetFrontendDir(dir string) {
+	frontendDir = dir
 }
 
 // getBooks returns books from store if available, otherwise from cache

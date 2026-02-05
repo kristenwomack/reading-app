@@ -1,0 +1,19 @@
+# Azure Developer CLI (azd) configuration
+# Run `azd up` to provision infrastructure and deploy
+
+name: reading-app
+metadata:
+  template: reading-app
+
+services:
+  api:
+    project: .
+    language: go
+    host: containerapp
+    docker:
+      path: ./Dockerfile
+      context: .
+
+infra:
+  provider: bicep
+  path: infra

@@ -20,5 +20,8 @@ books.db-shm
 .env.local
 .env.production
 
+# Azure local state (contains secrets)
+.azure/
+
 # OS files
 .DS_Store

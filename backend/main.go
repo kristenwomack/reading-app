@@ -33,20 +33,35 @@ func corsMiddleware(next http.Handler) http.Handler {
 func main() {
 	fmt.Println("Reading Tracker API")
 	
+	// Determine paths based on environment
+	// DATA_DIR is set in container; locally we use parent directory
+	dataDir := os.Getenv("DATA_DIR")
+	var dbPath, booksPath, frontendDir string
+	if dataDir != "" {
+		// Running in container
+		dbPath = filepath.Join(dataDir, "books.db")
+		booksPath = "books.json" // In container root
+		frontendDir = "frontend"
+	} else {
+		// Running locally from backend directory
+		dbPath = filepath.Join("..", "books.db")
+		booksPath = filepath.Join("..", "books.json")
+		frontendDir = "../frontend"
+	}
+	
 	// Initialize SQLite database
-	dbPath := filepath.Join("..", "books.db")
 	dataStore, err := store.New(dbPath)
 	if err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 	defer dataStore.Close()
 	handlers.SetStore(dataStore)
+	handlers.SetFrontendDir(frontendDir)
 	
 	// Check if we need to import from books.json
 	count, _ := dataStore.BookCount()
 	if count == 0 {
 		fmt.Println("Database empty, importing from books.json...")
-		booksPath := filepath.Join("..", "books.json")
 		allBooks, err := books.LoadBooks(booksPath)
 		if err != nil {
 			log.Fatalf("Failed to load books.json: %v", err)
@@ -100,17 +115,23 @@ func main() {
 	http.HandleFunc("/api/export", handlers.AuthMiddleware(handlers.ExportBooks))
 	
 	// Serve frontend static files
-	fs := http.FileServer(http.Dir("../frontend"))
+	fs := http.FileServer(http.Dir(frontendDir))
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		// Serve admin.html for /admin path
 		if r.URL.Path == "/admin" || strings.HasPrefix(r.URL.Path, "/admin/") {
-			http.ServeFile(w, r, "../frontend/admin.html")
+			http.ServeFile(w, r, filepath.Join(frontendDir, "admin.html"))
 			return
 		}
 		fs.ServeHTTP(w, r)
 	})
 	
-	fmt.Println("Server starting on http://localhost:3000")
+	// Get port from environment (default 3000 for local, 8080 in container)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "3000"
+	}
+	
+	fmt.Printf("Server starting on http://localhost:%s\n", port)
 	fmt.Println("API endpoints:")
 	fmt.Println("  GET  /api/years")
 	fmt.Println("  GET  /api/books?year=2025")
@@ -122,5 +143,5 @@ func main() {
 	fmt.Println("  GET  /admin (book entry form)")
 	
 	// Wrap with CORS middleware
-	log.Fatal(http.ListenAndServe(":3000", corsMiddleware(http.DefaultServeMux)))
+	log.Fatal(http.ListenAndServe(":"+port, corsMiddleware(http.DefaultServeMux)))
 }
