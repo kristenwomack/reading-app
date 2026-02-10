@@ -4,7 +4,6 @@ backend/run.sh
 
 # Test files
 backend/test_parse.go
-backend/testdata/
 
 # Dependencies
 node_modules/
