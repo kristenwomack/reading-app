@@ -3,6 +3,7 @@ package handlers
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -387,8 +388,9 @@ func TestUpdateBook(t *testing.T) {
 		"shelf":  "read",
 	}
 	body, _ := json.Marshal(bookData)
-	req := httptest.NewRequest(http.MethodPut, "/api/books/"+string(rune(id+'0')), bytes.NewBuffer(body))
-	req.URL.Path = "/api/books/" + string(rune(id+'0'))
+	idStr := fmt.Sprintf("%d", id)
+	req := httptest.NewRequest(http.MethodPut, "/api/books/"+idStr, bytes.NewBuffer(body))
+	req.URL.Path = "/api/books/" + idStr
 	w := httptest.NewRecorder()
 
 	// Execute
@@ -469,8 +471,9 @@ func TestDeleteBook(t *testing.T) {
 	}
 
 	// Delete the book
-	req := httptest.NewRequest(http.MethodDelete, "/api/books/"+string(rune(id+'0')), nil)
-	req.URL.Path = "/api/books/" + string(rune(id+'0'))
+	idStr := fmt.Sprintf("%d", id)
+	req := httptest.NewRequest(http.MethodDelete, "/api/books/"+idStr, nil)
+	req.URL.Path = "/api/books/" + idStr
 	w := httptest.NewRecorder()
 
 	// Execute
