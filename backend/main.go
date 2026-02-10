@@ -33,8 +33,13 @@ func corsMiddleware(next http.Handler) http.Handler {
 func main() {
 	fmt.Println("Reading Tracker API")
 	
+	// Determine database path (configurable for Railway persistent volume)
+	dbPath := os.Getenv("DATABASE_PATH")
+	if dbPath == "" {
+		dbPath = filepath.Join("..", "books.db")
+	}
+	
 	// Initialize SQLite database
-	dbPath := filepath.Join("..", "books.db")
 	dataStore, err := store.New(dbPath)
 	if err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
@@ -46,7 +51,11 @@ func main() {
 	count, _ := dataStore.BookCount()
 	if count == 0 {
 		fmt.Println("Database empty, importing from books.json...")
-		booksPath := filepath.Join("..", "books.json")
+		// Try local path first (Docker), then relative path (dev)
+		booksPath := "books.json"
+		if _, err := os.Stat(booksPath); os.IsNotExist(err) {
+			booksPath = filepath.Join("..", "books.json")
+		}
 		allBooks, err := books.LoadBooks(booksPath)
 		if err != nil {
 			log.Fatalf("Failed to load books.json: %v", err)
@@ -99,18 +108,35 @@ func main() {
 	// Export route (protected)
 	http.HandleFunc("/api/export", handlers.AuthMiddleware(handlers.ExportBooks))
 	
-	// Serve frontend static files
-	fs := http.FileServer(http.Dir("../frontend"))
+	// Health check endpoint
+	http.HandleFunc("/api/health", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{"status":"ok"}`))
+	})
+	
+	// Serve frontend static files (try Docker path first, then dev path)
+	frontendDir := "frontend"
+	if _, err := os.Stat(frontendDir); os.IsNotExist(err) {
+		frontendDir = "../frontend"
+	}
+	fs := http.FileServer(http.Dir(frontendDir))
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		// Serve admin.html for /admin path
 		if r.URL.Path == "/admin" || strings.HasPrefix(r.URL.Path, "/admin/") {
-			http.ServeFile(w, r, "../frontend/admin.html")
+			http.ServeFile(w, r, filepath.Join(frontendDir, "admin.html"))
 			return
 		}
 		fs.ServeHTTP(w, r)
 	})
 	
-	fmt.Println("Server starting on http://localhost:3000")
+	// Determine port (Railway sets PORT env var)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "3000"
+	}
+	
+	fmt.Printf("Server starting on http://localhost:%s\n", port)
 	fmt.Println("API endpoints:")
 	fmt.Println("  GET  /api/years")
 	fmt.Println("  GET  /api/books?year=2025")
@@ -122,5 +148,5 @@ func main() {
 	fmt.Println("  GET  /admin (book entry form)")
 	
 	// Wrap with CORS middleware
-	log.Fatal(http.ListenAndServe(":3000", corsMiddleware(http.DefaultServeMux)))
+	log.Fatal(http.ListenAndServe(":"+port, corsMiddleware(http.DefaultServeMux)))
 }

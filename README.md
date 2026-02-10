@@ -99,6 +99,8 @@ reading-app/
 | Environment Variable | Description | Default |
 |---------------------|-------------|---------|
 | `READING_APP_PASSWORD` | Password for admin access | (required) |
+| `DATABASE_PATH` | Path to SQLite database file | `../books.db` |
+| `PORT` | Server port (set automatically by Railway) | `3000` |
 
 ## Development
 
@@ -123,7 +125,25 @@ READING_APP_PASSWORD=secret ./reading-tracker
 
 ## Deployment
 
-For remote access, use a reverse proxy like Caddy for automatic HTTPS:
+### Railway (Recommended)
+
+Deploy the full app to [Railway](https://railway.com) with automatic HTTPS:
+
+1. **Create a Railway account** at [railway.com](https://railway.com)
+2. **Create a new project** → "Deploy from GitHub Repo" → select `reading-app`
+3. **Add a persistent volume** in the service settings:
+   - Mount path: `/data`
+   - This keeps your SQLite database safe across deploys
+4. **Set environment variables** in the Railway dashboard:
+   - `READING_APP_PASSWORD` — password for admin access (required)
+   - `DATABASE_PATH` — set to `/data/books.db`
+5. **Deploy** — Railway auto-builds from the Dockerfile and assigns a `.up.railway.app` URL
+
+Railway auto-deploys on every push to the connected branch.
+
+### Self-hosted
+
+For self-hosted deployment, use a reverse proxy like Caddy for automatic HTTPS:
 
 ```
 # Caddyfile
