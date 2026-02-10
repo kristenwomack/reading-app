@@ -1,5 +1,7 @@
 # 📚 Reading Tracker
 
+[![CI](https://github.com/kristenwomack/reading-app/actions/workflows/ci.yml/badge.svg)](https://github.com/kristenwomack/reading-app/actions/workflows/ci.yml)
+
 A personal reading tracker with a modern dashboard and mobile-friendly admin for logging books on the go.
 
 ## Features
