@@ -1,0 +1,36 @@
+[
+  {
+    "Title": "Test Book 1",
+    "Author": "Test Author 1",
+    "Additional Authors": "",
+    "ISBN": "1234567890",
+    "ISBN13": 9781234567890,
+    "Publisher": "Test Publisher",
+    "Number of Pages": 200,
+    "Year Published": 2025,
+    "Original Publication Year": 2025,
+    "Date Read": "2025/01/15",
+    "Date Added": "",
+    "Bookshelves": "read",
+    "Bookshelves with positions": "",
+    "Shelf": "read",
+    "My Review": ""
+  },
+  {
+    "Title": "Test Book 2",
+    "Author": "Test Author 2",
+    "Additional Authors": "",
+    "ISBN": "0987654321",
+    "ISBN13": 9780987654321,
+    "Publisher": "Another Publisher",
+    "Number of Pages": 300,
+    "Year Published": 2024,
+    "Original Publication Year": 2024,
+    "Date Read": "2024/12/20",
+    "Date Added": "",
+    "Bookshelves": "read",
+    "Bookshelves with positions": "",
+    "Shelf": "read",
+    "My Review": ""
+  }
+]
