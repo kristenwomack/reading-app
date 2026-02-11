@@ -345,3 +345,71 @@ func TestGetStatsInvalidYear(t *testing.T) {
 		t.Errorf("Expected status %d, got %d", http.StatusBadRequest, w.Code)
 	}
 }
+
+// TestGetBooksUsesStoredCoverURL verifies that stored cover URLs are used
+func TestGetBooksUsesStoredCoverURL(t *testing.T) {
+	// Setup with a book that has a custom cover URL
+	customCoverURL := "https://example.com/custom-cover.jpg"
+	testBooks := []books.Book{
+		{
+			Title:    "Book With Custom Cover",
+			Author:   "Test Author",
+			DateRead: "2025/03/15",
+			Pages:    250,
+			Shelf:    "read",
+			ISBN13:   "9781234567890",
+			CoverURL: customCoverURL, // Custom cover URL should take priority
+		},
+		{
+			Title:    "Book With ISBN Only",
+			Author:   "Another Author",
+			DateRead: "2025/04/20",
+			Pages:    300,
+			Shelf:    "read",
+			ISBN13:   "9780987654321",
+			CoverURL: "", // No custom cover, should generate from ISBN
+		},
+	}
+	SetBooks(testBooks)
+
+	// Create request for year 2025
+	req := httptest.NewRequest(http.MethodGet, "/api/books?year=2025", nil)
+	w := httptest.NewRecorder()
+
+	// Execute
+	GetBooks(w, req)
+
+	// Verify response code
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status %d, got %d", http.StatusOK, w.Code)
+	}
+
+	// Verify response body
+	var response map[string]interface{}
+	if err := json.NewDecoder(w.Body).Decode(&response); err != nil {
+		t.Fatalf("Failed to decode response: %v", err)
+	}
+
+	booksResp, ok := response["books"].([]interface{})
+	if !ok {
+		t.Fatal("Expected books array in response")
+	}
+
+	// Should have 2 books
+	if len(booksResp) != 2 {
+		t.Fatalf("Expected 2 books, got %d", len(booksResp))
+	}
+
+	// Check first book - should use custom cover URL
+	book1 := booksResp[0].(map[string]interface{})
+	if book1["coverUrl"] != customCoverURL {
+		t.Errorf("Expected custom cover URL %s, got %v", customCoverURL, book1["coverUrl"])
+	}
+
+	// Check second book - should generate from ISBN
+	book2 := booksResp[1].(map[string]interface{})
+	expectedURL := "https://covers.openlibrary.org/b/isbn/9780987654321-M.jpg"
+	if book2["coverUrl"] != expectedURL {
+		t.Errorf("Expected generated cover URL %s, got %v", expectedURL, book2["coverUrl"])
+	}
+}
