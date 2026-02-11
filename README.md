@@ -103,6 +103,7 @@ reading-app/
 | `READING_APP_PASSWORD` | Password for admin access | (required) |
 | `DATABASE_PATH` | Path to SQLite database file | `../books.db` |
 | `PORT` | Server port (set automatically by Railway) | `3000` |
+| `ALLOWED_ORIGINS` | Comma-separated list of allowed CORS origins | `http://localhost:3000` |
 
 ## Development
 
@@ -139,6 +140,7 @@ Deploy the full app to [Railway](https://railway.com) with automatic HTTPS:
 4. **Set environment variables** in the Railway dashboard:
    - `READING_APP_PASSWORD` — password for admin access (required)
    - `DATABASE_PATH` — set to `/data/books.db`
+   - `ALLOWED_ORIGINS` — set to your Railway app URL (e.g., `https://reading-app-production-5700.up.railway.app`)
 5. **Deploy** — Railway auto-builds from the Dockerfile and assigns a `.up.railway.app` URL
 
 Railway auto-deploys on every push to the connected branch.

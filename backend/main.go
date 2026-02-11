@@ -13,12 +13,56 @@ import (
 	"github.com/kristenwomack/reading-app/backend/internal/store"
 )
 
-// corsMiddleware adds CORS headers to allow browser access
+// allowedOrigins is a map of allowed CORS origins for O(1) lookup.
+// This map is initialized once by initAllowedOrigins() at server startup
+// and should not be modified afterward. It's safe for concurrent reads
+// during request handling.
+var allowedOrigins map[string]bool
+
+// initAllowedOrigins parses the ALLOWED_ORIGINS environment variable once at startup.
+// This function must be called once before starting the HTTP server and should not
+// be called again during server runtime.
+func initAllowedOrigins() {
+	allowedOrigins = make(map[string]bool)
+	
+	// Get allowed origins from environment variable, default to localhost:3000
+	allowedOriginsStr := os.Getenv("ALLOWED_ORIGINS")
+	if allowedOriginsStr == "" {
+		allowedOriginsStr = "http://localhost:3000"
+	}
+	
+	// Parse comma-separated origins and trim whitespace
+	origins := strings.Split(allowedOriginsStr, ",")
+	for _, origin := range origins {
+		trimmed := strings.TrimSpace(origin)
+		if trimmed != "" {
+			allowedOrigins[trimmed] = true
+		}
+	}
+}
+
+// corsMiddleware adds CORS headers to allow browser access from configured origins
 func corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		origin := r.Header.Get("Origin")
+		
+		// If no Origin header, this is a same-origin request - allow it
+		if origin == "" {
+			next.ServeHTTP(w, r)
+			return
+		}
+		
+		// Check if the request origin is allowed using O(1) map lookup
+		if !allowedOrigins[origin] {
+			http.Error(w, "Origin not allowed", http.StatusForbidden)
+			return
+		}
+		
+		// Set CORS headers for allowed origin
+		w.Header().Set("Access-Control-Allow-Origin", origin)
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
 		
 		// Handle preflight requests
 		if r.Method == "OPTIONS" {
@@ -32,6 +76,9 @@ func corsMiddleware(next http.Handler) http.Handler {
 
 func main() {
 	fmt.Println("Reading Tracker API")
+	
+	// Initialize allowed CORS origins from environment
+	initAllowedOrigins()
 	
 	// Determine database path (configurable for Railway persistent volume)
 	dbPath := os.Getenv("DATABASE_PATH")
