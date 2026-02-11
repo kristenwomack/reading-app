@@ -25,6 +25,7 @@ type Book struct {
 	BookshelvesWithPositions interface{} `json:"Bookshelves with positions"`
 	Shelf                    string      `json:"Shelf"`
 	MyReview                 interface{} `json:"My Review"`
+	CoverURL                 string      `json:"CoverURL,omitempty"`
 }
 
 // GetTitle returns the title as a string
