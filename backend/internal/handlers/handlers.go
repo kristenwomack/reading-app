@@ -46,6 +46,7 @@ func convertStoreBooks(storeBooks []store.Book) []books.Book {
 			Bookshelves:             sb.Shelf,
 			Shelf:                   sb.Shelf,
 			MyReview:                sb.Review,
+			CoverURL:                sb.CoverURL,
 		}
 	}
 	return result
@@ -140,11 +141,13 @@ func GetBooks(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 		
-		// Build cover URL from ISBN if available
-		isbn := getISBN(book)
-		coverURL := ""
-		if isbn != "" {
-			coverURL = "https://covers.openlibrary.org/b/isbn/" + isbn + "-M.jpg"
+		// Use stored cover URL if available, otherwise generate from ISBN
+		coverURL := book.CoverURL
+		if coverURL == "" {
+			isbn := getISBN(book)
+			if isbn != "" {
+				coverURL = "https://covers.openlibrary.org/b/isbn/" + isbn + "-M.jpg"
+			}
 		}
 		
 		responseBooks = append(responseBooks, BookResponse{
@@ -154,7 +157,7 @@ func GetBooks(w http.ResponseWriter, r *http.Request) {
 			Pages:    book.GetPages(),
 			Month:    date.Month,
 			Shelf:    book.Shelf,
-			ISBN:     isbn,
+			ISBN:     getISBN(book),
 			CoverURL: coverURL,
 		})
 	}
