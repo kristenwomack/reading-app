@@ -13,10 +13,15 @@ import (
 	"github.com/kristenwomack/reading-app/backend/internal/store"
 )
 
-// allowedOrigins is a map of allowed CORS origins for O(1) lookup
+// allowedOrigins is a map of allowed CORS origins for O(1) lookup.
+// This map is initialized once by initAllowedOrigins() at server startup
+// and should not be modified afterward. It's safe for concurrent reads
+// during request handling.
 var allowedOrigins map[string]bool
 
-// initAllowedOrigins parses the ALLOWED_ORIGINS environment variable once at startup
+// initAllowedOrigins parses the ALLOWED_ORIGINS environment variable once at startup.
+// This function must be called once before starting the HTTP server and should not
+// be called again during server runtime.
 func initAllowedOrigins() {
 	allowedOrigins = make(map[string]bool)
 	
