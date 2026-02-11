@@ -13,12 +13,49 @@ import (
 	"github.com/kristenwomack/reading-app/backend/internal/store"
 )
 
-// corsMiddleware adds CORS headers to allow browser access
+// corsMiddleware adds CORS headers to allow browser access from configured origins
 func corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		origin := r.Header.Get("Origin")
+		
+		// If no Origin header, this is a same-origin request - allow it
+		if origin == "" {
+			next.ServeHTTP(w, r)
+			return
+		}
+		
+		// Get allowed origins from environment variable, default to localhost:3000
+		allowedOriginsStr := os.Getenv("ALLOWED_ORIGINS")
+		if allowedOriginsStr == "" {
+			allowedOriginsStr = "http://localhost:3000"
+		}
+		
+		// Parse comma-separated origins and trim whitespace
+		allowedOrigins := strings.Split(allowedOriginsStr, ",")
+		for i := range allowedOrigins {
+			allowedOrigins[i] = strings.TrimSpace(allowedOrigins[i])
+		}
+		
+		// Check if the request origin is allowed
+		originAllowed := false
+		for _, allowed := range allowedOrigins {
+			if origin == allowed {
+				originAllowed = true
+				break
+			}
+		}
+		
+		// Reject requests from unknown origins
+		if !originAllowed {
+			http.Error(w, "Origin not allowed", http.StatusForbidden)
+			return
+		}
+		
+		// Set CORS headers for allowed origin
+		w.Header().Set("Access-Control-Allow-Origin", origin)
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
 		
 		// Handle preflight requests
 		if r.Method == "OPTIONS" {
