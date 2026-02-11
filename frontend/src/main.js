@@ -27,13 +27,11 @@ async function loadYearData(year) {
                 console.warn('Chart rendering failed:', chartError);
                 // Show a message instead of the chart if rendering fails
                 const chartContainer = document.getElementById('chart-container');
-                if (chartContainer) {
-                    const canvas = document.getElementById('monthly-chart');
-                    if (canvas) {
-                        canvas.style.display = 'none';
-                    }
+                const canvas = document.getElementById('monthly-chart');
+                if (chartContainer && canvas) {
+                    canvas.style.display = 'none';
                     const message = document.createElement('p');
-                    message.style.cssText = 'color: #7f8c8d; text-align: center; padding: 20px;';
+                    message.className = 'chart-error-message';
                     message.textContent = 'Chart visualization unavailable (Chart.js library failed to load)';
                     chartContainer.appendChild(message);
                 }
