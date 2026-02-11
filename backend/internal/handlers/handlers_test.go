@@ -400,16 +400,52 @@ func TestGetBooksUsesStoredCoverURL(t *testing.T) {
 		t.Fatalf("Expected 2 books, got %d", len(booksResp))
 	}
 
-	// Check first book - should use custom cover URL
-	book1 := booksResp[0].(map[string]interface{})
-	if book1["coverUrl"] != customCoverURL {
-		t.Errorf("Expected custom cover URL %s, got %v", customCoverURL, book1["coverUrl"])
+	// Locate books by stable key (title) instead of relying on ordering
+	var customBook map[string]interface{}
+	var isbnBook map[string]interface{}
+
+	for i, item := range booksResp {
+		bookMap, ok := item.(map[string]interface{})
+		if !ok {
+			t.Fatalf("Expected book at index %d to be an object, got %T", i, item)
+		}
+
+		titleVal, ok := bookMap["title"].(string)
+		if !ok {
+			t.Fatalf("Expected book at index %d to have string title, got %T", i, bookMap["title"])
+		}
+
+		switch titleVal {
+		case "Book With Custom Cover":
+			customBook = bookMap
+		case "Book With ISBN Only":
+			isbnBook = bookMap
+		}
 	}
 
-	// Check second book - should generate from ISBN
-	book2 := booksResp[1].(map[string]interface{})
+	if customBook == nil {
+		t.Fatalf("Did not find book with title %q in response", "Book With Custom Cover")
+	}
+	if isbnBook == nil {
+		t.Fatalf("Did not find book with title %q in response", "Book With ISBN Only")
+	}
+
+	// Check custom-cover book - should use custom cover URL
+	customCoverVal, ok := customBook["coverUrl"].(string)
+	if !ok {
+		t.Fatalf("Expected custom cover book to have string coverUrl, got %T", customBook["coverUrl"])
+	}
+	if customCoverVal != customCoverURL {
+		t.Errorf("Expected custom cover URL %s, got %v", customCoverURL, customCoverVal)
+	}
+
+	// Check ISBN-only book - should generate from ISBN
+	isbnCoverVal, ok := isbnBook["coverUrl"].(string)
+	if !ok {
+		t.Fatalf("Expected ISBN-only book to have string coverUrl, got %T", isbnBook["coverUrl"])
+	}
 	expectedURL := "https://covers.openlibrary.org/b/isbn/9780987654321-M.jpg"
-	if book2["coverUrl"] != expectedURL {
-		t.Errorf("Expected generated cover URL %s, got %v", expectedURL, book2["coverUrl"])
+	if isbnCoverVal != expectedURL {
+		t.Errorf("Expected generated cover URL %s, got %v", expectedURL, isbnCoverVal)
 	}
 }
