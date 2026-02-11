@@ -25,10 +25,17 @@ async function loadYearData(year) {
                 renderChart(canvas, stats.monthlyBreakdown);
             } catch (chartError) {
                 console.warn('Chart rendering failed:', chartError);
-                // Hide chart container if rendering fails
+                // Show a message instead of the chart if rendering fails
                 const chartContainer = document.getElementById('chart-container');
                 if (chartContainer) {
-                    chartContainer.style.display = 'none';
+                    const canvas = document.getElementById('monthly-chart');
+                    if (canvas) {
+                        canvas.style.display = 'none';
+                    }
+                    const message = document.createElement('p');
+                    message.style.cssText = 'color: #7f8c8d; text-align: center; padding: 20px;';
+                    message.textContent = 'Chart visualization unavailable (Chart.js library failed to load)';
+                    chartContainer.appendChild(message);
                 }
             }
             
