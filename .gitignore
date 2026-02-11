@@ -21,3 +21,4 @@ books.db-shm
 
 # OS files
 .DS_Store
+coverage.out
