@@ -10,6 +10,7 @@ import (
 func TestCorsMiddlewareDefaultOrigin(t *testing.T) {
 	// Test default behavior when no ALLOWED_ORIGINS is set
 	os.Unsetenv("ALLOWED_ORIGINS")
+	initAllowedOrigins()
 	
 	handler := corsMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -33,6 +34,7 @@ func TestCorsMiddlewareDefaultOrigin(t *testing.T) {
 func TestCorsMiddlewareDefaultOriginRejection(t *testing.T) {
 	// Test that non-default origins are rejected when no ALLOWED_ORIGINS is set
 	os.Unsetenv("ALLOWED_ORIGINS")
+	initAllowedOrigins()
 	
 	handler := corsMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -57,6 +59,7 @@ func TestCorsMiddlewareConfiguredOrigins(t *testing.T) {
 	// Test with multiple configured origins
 	os.Setenv("ALLOWED_ORIGINS", "http://localhost:3000,https://reading-app-production-5700.up.railway.app")
 	defer os.Unsetenv("ALLOWED_ORIGINS")
+	initAllowedOrigins()
 	
 	handler := corsMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -94,6 +97,7 @@ func TestCorsMiddlewareRejectUnknownOrigin(t *testing.T) {
 	// Test that unknown origins are rejected
 	os.Setenv("ALLOWED_ORIGINS", "http://localhost:3000,https://reading-app-production-5700.up.railway.app")
 	defer os.Unsetenv("ALLOWED_ORIGINS")
+	initAllowedOrigins()
 	
 	handler := corsMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -118,6 +122,7 @@ func TestCorsMiddlewareNoOriginHeader(t *testing.T) {
 	// Test that requests without Origin header are allowed (same-origin requests)
 	os.Setenv("ALLOWED_ORIGINS", "http://localhost:3000")
 	defer os.Unsetenv("ALLOWED_ORIGINS")
+	initAllowedOrigins()
 	
 	handler := corsMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -143,6 +148,7 @@ func TestCorsMiddlewarePreflight(t *testing.T) {
 	// Test preflight OPTIONS request
 	os.Setenv("ALLOWED_ORIGINS", "http://localhost:3000")
 	defer os.Unsetenv("ALLOWED_ORIGINS")
+	initAllowedOrigins()
 	
 	handler := corsMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		t.Error("Handler should not be called for OPTIONS requests")
@@ -169,6 +175,7 @@ func TestCorsMiddlewareWhitespaceInOrigins(t *testing.T) {
 	// Test that whitespace in ALLOWED_ORIGINS is handled correctly
 	os.Setenv("ALLOWED_ORIGINS", " http://localhost:3000 , https://example.com ")
 	defer os.Unsetenv("ALLOWED_ORIGINS")
+	initAllowedOrigins()
 	
 	handler := corsMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)

@@ -13,6 +13,29 @@ import (
 	"github.com/kristenwomack/reading-app/backend/internal/store"
 )
 
+// allowedOrigins is a map of allowed CORS origins for O(1) lookup
+var allowedOrigins map[string]bool
+
+// initAllowedOrigins parses the ALLOWED_ORIGINS environment variable once at startup
+func initAllowedOrigins() {
+	allowedOrigins = make(map[string]bool)
+	
+	// Get allowed origins from environment variable, default to localhost:3000
+	allowedOriginsStr := os.Getenv("ALLOWED_ORIGINS")
+	if allowedOriginsStr == "" {
+		allowedOriginsStr = "http://localhost:3000"
+	}
+	
+	// Parse comma-separated origins and trim whitespace
+	origins := strings.Split(allowedOriginsStr, ",")
+	for _, origin := range origins {
+		trimmed := strings.TrimSpace(origin)
+		if trimmed != "" {
+			allowedOrigins[trimmed] = true
+		}
+	}
+}
+
 // corsMiddleware adds CORS headers to allow browser access from configured origins
 func corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -24,29 +47,8 @@ func corsMiddleware(next http.Handler) http.Handler {
 			return
 		}
 		
-		// Get allowed origins from environment variable, default to localhost:3000
-		allowedOriginsStr := os.Getenv("ALLOWED_ORIGINS")
-		if allowedOriginsStr == "" {
-			allowedOriginsStr = "http://localhost:3000"
-		}
-		
-		// Parse comma-separated origins and trim whitespace
-		allowedOrigins := strings.Split(allowedOriginsStr, ",")
-		for i := range allowedOrigins {
-			allowedOrigins[i] = strings.TrimSpace(allowedOrigins[i])
-		}
-		
-		// Check if the request origin is allowed
-		originAllowed := false
-		for _, allowed := range allowedOrigins {
-			if origin == allowed {
-				originAllowed = true
-				break
-			}
-		}
-		
-		// Reject requests from unknown origins
-		if !originAllowed {
+		// Check if the request origin is allowed using O(1) map lookup
+		if !allowedOrigins[origin] {
 			http.Error(w, "Origin not allowed", http.StatusForbidden)
 			return
 		}
@@ -69,6 +71,9 @@ func corsMiddleware(next http.Handler) http.Handler {
 
 func main() {
 	fmt.Println("Reading Tracker API")
+	
+	// Initialize allowed CORS origins from environment
+	initAllowedOrigins()
 	
 	// Determine database path (configurable for Railway persistent volume)
 	dbPath := os.Getenv("DATABASE_PATH")
