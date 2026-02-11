@@ -19,8 +19,18 @@ async function loadYearData(year) {
             showContent();
             updateStatistics(stats);
             
-            const canvas = document.getElementById('monthly-chart');
-            renderChart(canvas, stats.monthlyBreakdown);
+            // Try to render chart, but don't fail if Chart.js isn't loaded
+            try {
+                const canvas = document.getElementById('monthly-chart');
+                renderChart(canvas, stats.monthlyBreakdown);
+            } catch (chartError) {
+                console.warn('Chart rendering failed:', chartError);
+                // Hide chart container if rendering fails
+                const chartContainer = document.getElementById('chart-container');
+                if (chartContainer) {
+                    chartContainer.style.display = 'none';
+                }
+            }
             
             // Load and display book list
             await loadBookList(year);
