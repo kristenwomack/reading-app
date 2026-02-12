@@ -261,6 +261,12 @@ main {
     width: 100%;
 }
 
+.chart-error-message {
+    color: #7f8c8d;
+    text-align: center;
+    padding: 20px;
+}
+
 /* Empty & Error States */
 #empty-state, #error-state {
     background: var(--color-surface);
