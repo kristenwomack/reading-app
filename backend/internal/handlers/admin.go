@@ -220,6 +220,24 @@ func DeleteBook(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]bool{"success": true})
 }
 
+// exportBook matches the books.json Goodreads-style format for round-trip compatibility
+type exportBook struct {
+	Title                   string `json:"Title"`
+	Author                  string `json:"Author"`
+	AdditionalAuthors       string `json:"Additional Authors"`
+	ISBN                    string `json:"ISBN"`
+	ISBN13                  string `json:"ISBN13"`
+	Publisher               string `json:"Publisher"`
+	Pages                   int    `json:"Number of Pages"`
+	YearPublished           int    `json:"Year Published"`
+	OriginalPublicationYear int    `json:"Original Publication Year"`
+	DateRead                string `json:"Date Read"`
+	DateAdded               string `json:"Date Added"`
+	Shelf                   string `json:"Shelf"`
+	MyReview                string `json:"My Review"`
+	CoverURL                string `json:"CoverURL,omitempty"`
+}
+
 // ExportBooks handles GET /api/export
 func ExportBooks(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
@@ -233,9 +251,31 @@ func ExportBooks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	exported := make([]exportBook, len(books))
+	for i, b := range books {
+		exported[i] = exportBook{
+			Title:                   b.Title,
+			Author:                  b.Author,
+			AdditionalAuthors:       b.AdditionalAuthors,
+			ISBN:                    b.ISBN,
+			ISBN13:                  b.ISBN13,
+			Publisher:               b.Publisher,
+			Pages:                   b.Pages,
+			YearPublished:           b.YearPublished,
+			OriginalPublicationYear: b.OriginalPublicationYear,
+			DateRead:                b.DateRead,
+			DateAdded:               b.DateAdded,
+			Shelf:                   b.Shelf,
+			MyReview:                b.Review,
+			CoverURL:                b.CoverURL,
+		}
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Content-Disposition", "attachment; filename=books.json")
-	json.NewEncoder(w).Encode(books)
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", "  ")
+	enc.Encode(exported)
 }
 
 // GetGoal handles GET /api/goals/:year

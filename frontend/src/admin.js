@@ -8,6 +8,7 @@ const adminScreen = document.getElementById('admin-screen');
 const loginForm = document.getElementById('login-form');
 const loginError = document.getElementById('login-error');
 const logoutBtn = document.getElementById('logout-btn');
+const exportBtn = document.getElementById('export-btn');
 const quickAddForm = document.getElementById('quick-add-form');
 const formMessage = document.getElementById('form-message');
 const scanBtn = document.getElementById('scan-btn');
@@ -150,6 +151,9 @@ function setupEventListeners() {
     // Logout
     logoutBtn.addEventListener('click', handleLogout);
     
+    // Export
+    exportBtn.addEventListener('click', handleExport);
+    
     // Book form
     quickAddForm.addEventListener('submit', handleAddBook);
     
@@ -193,6 +197,25 @@ async function handleLogin(e) {
 
 // Handle logout
 async function handleLogout() {
+
+// Handle export - download books.json backup
+async function handleExport() {
+    try {
+        const response = await fetch(`${API_BASE}/export`);
+        if (!response.ok) throw new Error('Export failed');
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'books.json';
+        a.click();
+        URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error('Export failed:', error);
+        showMessage('Failed to export books. Are you logged in?', 'error');
+    }
+}
+
     try {
         await fetch(`${API_BASE}/auth/logout`, { method: 'POST' });
     } catch (error) {
