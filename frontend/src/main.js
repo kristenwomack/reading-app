@@ -22,18 +22,15 @@ async function loadYearData(year) {
             
             // Try to render chart, but don't fail if Chart.js isn't loaded
             try {
-                const canvas = document.getElementById('monthly-chart');
-                renderChart(canvas, stats.monthlyBreakdown);
+                const chartDiv = document.getElementById('monthly-chart');
+                renderChart(chartDiv, stats.monthlyBreakdown);
             } catch (chartError) {
                 console.warn('Chart rendering failed:', chartError);
-                // Show a message instead of the chart if rendering fails
                 const chartContainer = document.getElementById('chart-container');
-                const canvas = document.getElementById('monthly-chart');
-                if (chartContainer && canvas) {
-                    canvas.style.display = 'none';
+                if (chartContainer) {
                     const message = document.createElement('p');
                     message.className = 'chart-error-message';
-                    message.textContent = 'Chart visualization unavailable (Chart.js library failed to load)';
+                    message.textContent = 'Chart visualization unavailable (D3.js library failed to load)';
                     chartContainer.appendChild(message);
                 }
             }
