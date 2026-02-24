@@ -1,4 +1,6 @@
-// Chart rendering with D3.js — Tokyo Night theme
+// Chart rendering with D3.js
+const ANNUAL_GOAL = 90;
+
 let chartSvg = null;
 
 // Tokyo Night palette
