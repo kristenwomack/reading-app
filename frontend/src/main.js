@@ -80,24 +80,16 @@ function hideBookList() {
 }
 
 function renderBookCard(book) {
-    const dateStr = book.dateRead ? formatDate(book.dateRead) : '';
-    const pagesStr = book.pages > 0 ? book.pages + ' pages' : '';
-    
     let coverHtml = '<div class="book-cover-placeholder">📚</div>';
     if (book.coverUrl) {
         coverHtml = '<img src="' + escapeHtml(book.coverUrl) + '" alt="" class="book-cover" loading="lazy" onerror="this.style.display=\'none\'">';
     }
     
-    let metaHtml = '';
-    if (dateStr) metaHtml += '<span>📅 ' + dateStr + '</span>';
-    if (pagesStr) metaHtml += '<span>📖 ' + pagesStr + '</span>';
-    
     return '<div class="book-card">' +
-        coverHtml +
+        '<div class="book-cover-wrap">' + coverHtml + '</div>' +
         '<div class="book-info">' +
         '<div class="book-title">' + escapeHtml(book.title) + '</div>' +
         '<div class="book-author">' + escapeHtml(book.author) + '</div>' +
-        (metaHtml ? '<div class="book-meta">' + metaHtml + '</div>' : '') +
         '</div></div>';
 }
 
