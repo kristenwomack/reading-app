@@ -55,6 +55,8 @@ export function renderChart(container, monthlyData) {
         .nice()
         .range([height, 0]);
 
+    const yRightMax = goal ?? Math.max(...cumulativeData, 1);
+
     const yRight = d3.scaleLinear()
         .domain([0, YEARLY_GOAL])
         .range([height, 0]);
