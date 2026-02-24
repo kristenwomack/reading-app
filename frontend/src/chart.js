@@ -1,4 +1,6 @@
 // Chart rendering with D3.js
+const ANNUAL_GOAL = 90;
+
 let chartSvg = null;
 
 export function renderChart(container, monthlyData) {
@@ -45,7 +47,7 @@ export function renderChart(container, monthlyData) {
         .range([height, 0]);
 
     const yRight = d3.scaleLinear()
-        .domain([0, 90])
+        .domain([0, ANNUAL_GOAL])
         .range([height, 0]);
 
     // Axes
@@ -76,7 +78,7 @@ export function renderChart(container, monthlyData) {
         .attr('x', -height / 2)
         .attr('text-anchor', 'middle')
         .style('font-size', '12px')
-        .text('Total Books (Goal: 90)');
+        .text(`Total Books (Goal: ${ANNUAL_GOAL})`);
 
     // Line generator using band midpoints
     const xMid = (label) => x(label) + x.bandwidth() / 2;
@@ -143,7 +145,7 @@ export function renderChart(container, monthlyData) {
     legend.append('text').attr('x', 16).attr('y', 10).text('Books Read per Month').style('font-size', '11px');
 
     legend.append('rect').attr('x', 160).attr('width', 12).attr('height', 12).attr('fill', 'rgb(255, 99, 132)');
-    legend.append('text').attr('x', 176).attr('y', 10).text('Cumulative Progress (Goal: 90)').style('font-size', '11px');
+    legend.append('text').attr('x', 176).attr('y', 10).text(`Cumulative Progress (Goal: ${ANNUAL_GOAL})`).style('font-size', '11px');
 
     chartSvg = svg;
 }
