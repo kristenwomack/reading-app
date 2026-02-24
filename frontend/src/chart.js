@@ -54,7 +54,7 @@ export function renderChart(container, monthlyData) {
         .range([height, 0]);
 
     const yRight = d3.scaleLinear()
-        .domain([0, 90])
+        .domain([0, YEARLY_GOAL])
         .range([height, 0]);
 
     // Axes
@@ -92,7 +92,7 @@ export function renderChart(container, monthlyData) {
         .attr('x', -height / 2)
         .attr('text-anchor', 'middle')
         .style('font-size', '12px')
-        .text('Total Books (Goal: 90)');
+        .text(`Total Books (Goal: ${YEARLY_GOAL})`);
 
     const xMid = (label) => x(label) + x.bandwidth() / 2;
 
