@@ -1,5 +1,5 @@
 // Main application entry point
-import { fetchYears, fetchStats, fetchBooks } from './api-client.js';
+import { fetchYears, fetchStats, fetchBooks, fetchGoal } from './api-client.js';
 import { renderChart } from './chart.js';
 import { populateYearSelector, updateStatistics, renderSummaryCard, showEmptyState, showError, showContent } from './ui.js';
 
@@ -15,6 +15,7 @@ async function loadYearData(year) {
         if (stats.totalBooks === 0) {
             showEmptyState(year);
             hideBookList();
+            hideGoalProgress();
         } else {
             showContent();
             updateStatistics(stats);
@@ -37,8 +38,8 @@ async function loadYearData(year) {
                 }
             }
             
-            // Load and display book list
             await loadBookList(year);
+            loadGoalProgress(year, stats.totalBooks);
         }
         
     } catch (error) {
@@ -120,6 +121,36 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+function hideGoalProgress() {
+    const section = document.getElementById('goal-progress');
+    if (section) section.classList.add('hidden');
+}
+
+async function loadGoalProgress(year, currentBooks) {
+    const goalSection = document.getElementById('goal-progress');
+    if (!goalSection) return;
+
+    try {
+        const data = await fetchGoal(year);
+        if (!data.target) {
+            goalSection.classList.add('hidden');
+            return;
+        }
+
+        const target = data.target;
+        const percent = Math.min(100, Math.round((currentBooks / target) * 100));
+
+        document.getElementById('goal-title').textContent = year + ' Goal';
+        document.getElementById('goal-stats').textContent = currentBooks + ' of ' + target + ' books';
+        document.getElementById('progress-fill').style.width = percent + '%';
+        document.getElementById('goal-percent').textContent = percent + '% complete';
+
+        goalSection.classList.remove('hidden');
+    } catch {
+        goalSection.classList.add('hidden');
+    }
 }
 
 async function init() {

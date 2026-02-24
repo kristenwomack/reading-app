@@ -31,3 +31,11 @@ export async function fetchStats(year) {
     }
     return response.json();
 }
+
+export async function fetchGoal(year) {
+    const response = await fetch(`${API_BASE}/goals/${year}`);
+    if (!response.ok) {
+        throw new Error('Failed to fetch goal');
+    }
+    return response.json();
+}
