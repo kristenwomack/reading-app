@@ -1,16 +1,25 @@
-// Chart rendering with D3.js
+// Chart rendering with D3.js — Tokyo Night theme
 let chartSvg = null;
+
+// Tokyo Night palette
+const CHART_COLORS = {
+    monthly: '#7dcfff',       // accent-tertiary (cyan)
+    monthlyFill: 'rgba(125, 207, 255, 0.15)',
+    cumulative: '#bb9af7',    // accent-secondary (purple)
+    text: '#a9b1d6',          // fg-secondary
+    textMuted: '#565f89',     // fg-muted
+    grid: '#2f3449',          // border-muted
+    dot: '#7aa2f7',           // accent-primary
+};
 
 export function renderChart(container, monthlyData) {
     if (!container || !monthlyData) return;
 
-    // Clear previous chart
     container.innerHTML = '';
 
     const labels = monthlyData.map(m => m.MonthName);
     const data = monthlyData.map(m => m.Count);
 
-    // Calculate cumulative progress
     const cumulativeData = [];
     let runningTotal = 0;
     for (let i = 0; i < data.length; i++) {
@@ -53,12 +62,17 @@ export function renderChart(container, monthlyData) {
         .attr('transform', `translate(0,${height})`)
         .call(d3.axisBottom(x))
         .selectAll('text')
-        .style('font-size', '11px');
+        .style('font-size', '11px')
+        .style('fill', CHART_COLORS.text);
+
+    g.selectAll('.domain, line').style('stroke', CHART_COLORS.grid);
 
     g.append('g')
         .call(d3.axisLeft(yLeft).ticks(Math.max(...data, 1)).tickFormat(d3.format('d')))
+        .call(g => g.selectAll('.domain, line').style('stroke', CHART_COLORS.grid))
+        .call(g => g.selectAll('text').style('fill', CHART_COLORS.text))
         .append('text')
-        .attr('fill', 'rgb(75, 192, 192)')
+        .attr('fill', CHART_COLORS.monthly)
         .attr('transform', 'rotate(-90)')
         .attr('y', -40)
         .attr('x', -height / 2)
@@ -69,8 +83,10 @@ export function renderChart(container, monthlyData) {
     g.append('g')
         .attr('transform', `translate(${width},0)`)
         .call(d3.axisRight(yRight).ticks(9).tickFormat(d3.format('d')))
+        .call(g => g.selectAll('.domain, line').style('stroke', CHART_COLORS.grid))
+        .call(g => g.selectAll('text').style('fill', CHART_COLORS.text))
         .append('text')
-        .attr('fill', 'rgb(255, 99, 132)')
+        .attr('fill', CHART_COLORS.cumulative)
         .attr('transform', 'rotate(-90)')
         .attr('y', 50)
         .attr('x', -height / 2)
@@ -78,10 +94,9 @@ export function renderChart(container, monthlyData) {
         .style('font-size', '12px')
         .text('Total Books (Goal: 90)');
 
-    // Line generator using band midpoints
     const xMid = (label) => x(label) + x.bandwidth() / 2;
 
-    // Monthly area + line (left axis)
+    // Monthly area + line
     const areaGen = d3.area()
         .x((_, i) => xMid(labels[i]))
         .y0(height)
@@ -95,17 +110,17 @@ export function renderChart(container, monthlyData) {
 
     g.append('path')
         .datum(data)
-        .attr('fill', 'rgba(75, 192, 192, 0.2)')
+        .attr('fill', CHART_COLORS.monthlyFill)
         .attr('d', areaGen);
 
     g.append('path')
         .datum(data)
         .attr('fill', 'none')
-        .attr('stroke', 'rgb(75, 192, 192)')
+        .attr('stroke', CHART_COLORS.monthly)
         .attr('stroke-width', 2)
         .attr('d', lineGen);
 
-    // Cumulative line (right axis)
+    // Cumulative line
     const cumLineGen = d3.line()
         .x((_, i) => xMid(labels[i]))
         .y((d) => yRight(d))
@@ -114,7 +129,7 @@ export function renderChart(container, monthlyData) {
     g.append('path')
         .datum(cumulativeData)
         .attr('fill', 'none')
-        .attr('stroke', 'rgb(255, 99, 132)')
+        .attr('stroke', CHART_COLORS.cumulative)
         .attr('stroke-width', 2)
         .attr('d', cumLineGen);
 
@@ -125,7 +140,7 @@ export function renderChart(container, monthlyData) {
         .attr('cx', (_, i) => xMid(labels[i]))
         .attr('cy', d => yLeft(d))
         .attr('r', 3)
-        .attr('fill', 'rgb(75, 192, 192)');
+        .attr('fill', CHART_COLORS.monthly);
 
     g.selectAll('.dot-cumulative')
         .data(cumulativeData)
@@ -133,17 +148,17 @@ export function renderChart(container, monthlyData) {
         .attr('cx', (_, i) => xMid(labels[i]))
         .attr('cy', d => yRight(d))
         .attr('r', 3)
-        .attr('fill', 'rgb(255, 99, 132)');
+        .attr('fill', CHART_COLORS.cumulative);
 
     // Legend
     const legend = svg.append('g')
         .attr('transform', `translate(${margin.left + 10}, ${margin.top})`);
 
-    legend.append('rect').attr('width', 12).attr('height', 12).attr('fill', 'rgb(75, 192, 192)');
-    legend.append('text').attr('x', 16).attr('y', 10).text('Books Read per Month').style('font-size', '11px');
+    legend.append('rect').attr('width', 12).attr('height', 12).attr('fill', CHART_COLORS.monthly).attr('rx', 2);
+    legend.append('text').attr('x', 16).attr('y', 10).text('Books Read per Month').style('font-size', '11px').style('fill', CHART_COLORS.text);
 
-    legend.append('rect').attr('x', 160).attr('width', 12).attr('height', 12).attr('fill', 'rgb(255, 99, 132)');
-    legend.append('text').attr('x', 176).attr('y', 10).text('Cumulative Progress (Goal: 90)').style('font-size', '11px');
+    legend.append('rect').attr('x', 160).attr('width', 12).attr('height', 12).attr('fill', CHART_COLORS.cumulative).attr('rx', 2);
+    legend.append('text').attr('x', 176).attr('y', 10).text('Cumulative Progress (Goal: 90)').style('font-size', '11px').style('fill', CHART_COLORS.text);
 
     chartSvg = svg;
 }
