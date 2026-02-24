@@ -223,12 +223,18 @@ main {
     text-align: right;
 }
 
+/* Summary Section */
+.summary-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
 /* Stats Cards */
 #statistics {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    margin-bottom: 36px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 .stat-card {
@@ -457,11 +463,6 @@ main {
     
     h1 {
         font-size: 1.5rem;
-    }
-    
-    #statistics {
-        grid-template-columns: 1fr;
-        gap: 12px;
     }
     
     .stat-card {
