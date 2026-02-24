@@ -1,5 +1,5 @@
 // Main application entry point
-import { fetchYears, fetchStats, fetchBooks } from './api-client.js';
+import { fetchYears, fetchStats, fetchBooks, fetchGoal } from './api-client.js';
 import { renderChart } from './chart.js';
 import { populateYearSelector, updateStatistics, renderSummaryCard, showEmptyState, showError, showContent } from './ui.js';
 
@@ -8,37 +8,39 @@ let currentYear = new Date().getFullYear();
 async function loadYearData(year) {
     currentYear = year;
     try {
-        const stats = await fetchStats(year);
+        const [stats, goalData] = await Promise.all([
+            fetchStats(year),
+            fetchGoal(year).catch((err) => { console.warn('Could not load goal for year', year, err); return null; })
+        ]);
+        const goal = goalData?.target ?? null;
         
         renderSummaryCard(stats);
         
         if (stats.totalBooks === 0) {
             showEmptyState(year);
             hideBookList();
+            hideGoalProgress();
         } else {
             showContent();
             updateStatistics(stats);
             
             // Try to render chart, but don't fail if Chart.js isn't loaded
             try {
-                const canvas = document.getElementById('monthly-chart');
-                renderChart(canvas, stats.monthlyBreakdown);
+                const chartDiv = document.getElementById('monthly-chart');
+                renderChart(chartDiv, stats.monthlyBreakdown, goal);
             } catch (chartError) {
                 console.warn('Chart rendering failed:', chartError);
-                // Show a message instead of the chart if rendering fails
                 const chartContainer = document.getElementById('chart-container');
-                const canvas = document.getElementById('monthly-chart');
-                if (chartContainer && canvas) {
-                    canvas.style.display = 'none';
+                if (chartContainer) {
                     const message = document.createElement('p');
                     message.className = 'chart-error-message';
-                    message.textContent = 'Chart visualization unavailable (Chart.js library failed to load)';
+                    message.textContent = 'Chart visualization unavailable (D3.js library failed to load)';
                     chartContainer.appendChild(message);
                 }
             }
             
-            // Load and display book list
             await loadBookList(year);
+            displayGoalProgress(year, stats.totalBooks, goal);
         }
         
     } catch (error) {
@@ -82,24 +84,16 @@ function hideBookList() {
 }
 
 function renderBookCard(book) {
-    const dateStr = book.dateRead ? formatDate(book.dateRead) : '';
-    const pagesStr = book.pages > 0 ? book.pages + ' pages' : '';
-    
     let coverHtml = '<div class="book-cover-placeholder">📚</div>';
     if (book.coverUrl) {
         coverHtml = '<img src="' + escapeHtml(book.coverUrl) + '" alt="" class="book-cover" loading="lazy" onerror="this.style.display=\'none\'">';
     }
     
-    let metaHtml = '';
-    if (dateStr) metaHtml += '<span>📅 ' + dateStr + '</span>';
-    if (pagesStr) metaHtml += '<span>📖 ' + pagesStr + '</span>';
-    
     return '<div class="book-card">' +
-        coverHtml +
+        '<div class="book-cover-wrap">' + coverHtml + '</div>' +
         '<div class="book-info">' +
         '<div class="book-title">' + escapeHtml(book.title) + '</div>' +
         '<div class="book-author">' + escapeHtml(book.author) + '</div>' +
-        (metaHtml ? '<div class="book-meta">' + metaHtml + '</div>' : '') +
         '</div></div>';
 }
 
@@ -120,6 +114,30 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+function hideGoalProgress() {
+    const section = document.getElementById('goal-progress');
+    if (section) section.classList.add('hidden');
+}
+
+function displayGoalProgress(year, currentBooks, goal) {
+    const goalSection = document.getElementById('goal-progress');
+    if (!goalSection) return;
+
+    if (!goal) {
+        goalSection.classList.add('hidden');
+        return;
+    }
+
+    const percent = Math.min(100, Math.round((currentBooks / goal) * 100));
+
+    document.getElementById('goal-title').textContent = year + ' Goal';
+    document.getElementById('goal-stats').textContent = currentBooks + ' of ' + goal + ' books';
+    document.getElementById('progress-fill').style.width = percent + '%';
+    document.getElementById('goal-percent').textContent = percent + '% complete';
+
+    goalSection.classList.remove('hidden');
 }
 
 async function init() {
