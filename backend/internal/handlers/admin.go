@@ -7,14 +7,21 @@ import (
 	"strings"
 
 	"github.com/kristenwomack/reading-app/backend/internal/auth"
+	"github.com/kristenwomack/reading-app/backend/internal/covers"
 	"github.com/kristenwomack/reading-app/backend/internal/store"
 )
 
 var dataStore *store.Store
+var coverResolver *covers.Resolver
 
 // SetStore sets the database store for handlers
 func SetStore(s *store.Store) {
 	dataStore = s
+}
+
+// SetCoverResolver sets the cover resolver for enrichment handlers
+func SetCoverResolver(r *covers.Resolver) {
+	coverResolver = r
 }
 
 // AuthMiddleware protects routes that require authentication

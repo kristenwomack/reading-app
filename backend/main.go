@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/kristenwomack/reading-app/backend/internal/books"
+	"github.com/kristenwomack/reading-app/backend/internal/covers"
 	"github.com/kristenwomack/reading-app/backend/internal/handlers"
 	"github.com/kristenwomack/reading-app/backend/internal/store"
 )
@@ -93,6 +94,7 @@ func main() {
 	}
 	defer dataStore.Close()
 	handlers.SetStore(dataStore)
+	handlers.SetCoverResolver(covers.New(http.DefaultClient))
 	
 	// Check if we need to import from books.json
 	count, _ := dataStore.BookCount()
