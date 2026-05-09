@@ -140,6 +140,12 @@
     font-weight: 500;
 }
 
+.label-hint {
+    font-weight: 400;
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
 .form-group input,
 .form-group select,
 .form-group textarea {
