@@ -34,9 +34,12 @@ export function renderChart(container, monthlyData, goal = null) {
     const width = containerWidth - margin.left - margin.right;
     const height = Math.round(containerWidth / 1.618) - margin.top - margin.bottom;
 
+    const svgHeight = height + margin.top + margin.bottom;
     const svg = d3.select(container)
         .append('svg')
-        .attr('viewBox', `0 0 ${containerWidth} ${height + margin.top + margin.bottom}`)
+        .attr('width', containerWidth)
+        .attr('height', svgHeight)
+        .attr('viewBox', `0 0 ${containerWidth} ${svgHeight}`)
         .attr('preserveAspectRatio', 'xMidYMid meet')
         .style('width', '100%')
         .style('height', 'auto');
