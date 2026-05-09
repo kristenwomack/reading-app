@@ -14,7 +14,7 @@ const CHART_COLORS = {
     dot: '#7aa2f7',           // accent-primary
 };
 
-export function renderChart(container, monthlyData) {
+export function renderChart(container, monthlyData, goal = null) {
     if (!container || !monthlyData) return;
 
     container.innerHTML = '';
@@ -34,9 +34,12 @@ export function renderChart(container, monthlyData) {
     const width = containerWidth - margin.left - margin.right;
     const height = Math.round(containerWidth / 1.618) - margin.top - margin.bottom;
 
+    const svgHeight = height + margin.top + margin.bottom;
     const svg = d3.select(container)
         .append('svg')
-        .attr('viewBox', `0 0 ${containerWidth} ${height + margin.top + margin.bottom}`)
+        .attr('width', containerWidth)
+        .attr('height', svgHeight)
+        .attr('viewBox', `0 0 ${containerWidth} ${svgHeight}`)
         .attr('preserveAspectRatio', 'xMidYMid meet')
         .style('width', '100%')
         .style('height', 'auto');
@@ -55,10 +58,10 @@ export function renderChart(container, monthlyData) {
         .nice()
         .range([height, 0]);
 
-    const yRightMax = goal ?? Math.max(...cumulativeData, 1);
+    const yRightMax = goal ?? Math.max(...cumulativeData, ANNUAL_GOAL);
 
     const yRight = d3.scaleLinear()
-        .domain([0, YEARLY_GOAL])
+        .domain([0, yRightMax])
         .range([height, 0]);
 
     // Axes
@@ -96,7 +99,7 @@ export function renderChart(container, monthlyData) {
         .attr('x', -height / 2)
         .attr('text-anchor', 'middle')
         .style('font-size', '12px')
-        .text(`Total Books (Goal: ${YEARLY_GOAL})`);
+        .text(`Total Books (Goal: ${goal ?? ANNUAL_GOAL})`);
 
     const xMid = (label) => x(label) + x.bandwidth() / 2;
 
@@ -162,7 +165,7 @@ export function renderChart(container, monthlyData) {
     legend.append('text').attr('x', 16).attr('y', 10).text('Books Read per Month').style('font-size', '11px').style('fill', CHART_COLORS.text);
 
     legend.append('rect').attr('x', 160).attr('width', 12).attr('height', 12).attr('fill', CHART_COLORS.cumulative).attr('rx', 2);
-    legend.append('text').attr('x', 176).attr('y', 10).text('Cumulative Progress (Goal: 90)').style('font-size', '11px').style('fill', CHART_COLORS.text);
+    legend.append('text').attr('x', 176).attr('y', 10).text(`Cumulative Progress (Goal: ${goal ?? ANNUAL_GOAL})`).style('font-size', '11px').style('fill', CHART_COLORS.text);
 
     chartSvg = svg;
 }

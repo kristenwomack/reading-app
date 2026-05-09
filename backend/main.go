@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/kristenwomack/reading-app/backend/internal/books"
+	"github.com/kristenwomack/reading-app/backend/internal/covers"
 	"github.com/kristenwomack/reading-app/backend/internal/handlers"
 	"github.com/kristenwomack/reading-app/backend/internal/store"
 )
@@ -93,6 +94,7 @@ func main() {
 	}
 	defer dataStore.Close()
 	handlers.SetStore(dataStore)
+	handlers.SetCoverResolver(covers.New(http.DefaultClient))
 	
 	// Check if we need to import from books.json
 	count, _ := dataStore.BookCount()
@@ -173,6 +175,10 @@ func main() {
 		if r.URL.Path == "/admin" || strings.HasPrefix(r.URL.Path, "/admin/") {
 			http.ServeFile(w, r, filepath.Join(frontendDir, "admin.html"))
 			return
+		}
+		// Prevent caching of JS/CSS files during development
+		if strings.HasSuffix(r.URL.Path, ".js") || strings.HasSuffix(r.URL.Path, ".css") {
+			w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
 		}
 		fs.ServeHTTP(w, r)
 	})
