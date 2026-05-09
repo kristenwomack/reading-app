@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/kristenwomack/reading-app/backend/internal/books"
+	"github.com/kristenwomack/reading-app/backend/internal/covers"
 	"github.com/kristenwomack/reading-app/backend/internal/store"
 )
 
@@ -141,13 +142,14 @@ func GetBooks(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 		
-		// Use stored cover URL if available, otherwise generate from ISBN
-		coverURL := book.CoverURL
-		if coverURL == "" {
-			isbn := getISBN(book)
-			if isbn != "" {
-				coverURL = "https://covers.openlibrary.org/b/isbn/" + isbn + "-M.jpg"
-			}
+		// Resolve cover URL using fallback chain:
+		// 1. Stored cover URL (if valid)
+		// 2. ISBN-based Open Library cover
+		// 3. Title+Author search via Open Library
+		isbn := getISBN(book)
+		coverURL := covers.CoverURLByISBN(isbn)
+		if book.CoverURL != "" {
+			coverURL = book.CoverURL
 		}
 		
 		responseBooks = append(responseBooks, BookResponse{

@@ -135,6 +135,11 @@ func main() {
 		}
 	})
 	http.HandleFunc("/api/books/", func(w http.ResponseWriter, r *http.Request) {
+		// Route /api/books/{id}/cover to cover resolver
+		if strings.HasSuffix(r.URL.Path, "/cover") && r.Method == http.MethodGet {
+			handlers.GetCoverURL(w, r)
+			return
+		}
 		if r.Method == http.MethodPut {
 			handlers.AuthMiddleware(handlers.UpdateBook)(w, r)
 		} else if r.Method == http.MethodDelete {
@@ -156,6 +161,9 @@ func main() {
 	
 	// Export route (protected)
 	http.HandleFunc("/api/export", handlers.AuthMiddleware(handlers.ExportBooks))
+	
+	// Cover enrichment (protected)
+	http.HandleFunc("/api/covers/enrich", handlers.AuthMiddleware(handlers.EnrichCovers))
 	
 	// Health check endpoint
 	http.HandleFunc("/api/health", func(w http.ResponseWriter, r *http.Request) {

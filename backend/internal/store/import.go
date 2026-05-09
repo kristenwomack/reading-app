@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/kristenwomack/reading-app/backend/internal/books"
+	"github.com/kristenwomack/reading-app/backend/internal/covers"
 )
 
 // ImportFromJSON imports books from the old JSON format into the database
@@ -35,7 +36,7 @@ func (s *Store) ImportFromJSON(jsonBooks []books.Book) (int, error) {
 			DateAdded:               toString(jb.DateAdded),
 			Shelf:                   jb.Shelf,
 			Review:                  toString(jb.MyReview),
-			CoverURL:                buildCoverURL(jb.ISBN, jb.ISBN13),
+			CoverURL:                covers.CoverURLByISBN(covers.PreferISBN(toString(jb.ISBN), toString(jb.ISBN13))),
 		}
 
 		if b.Title == "" || b.Author == "" {
@@ -98,14 +99,7 @@ func toInt(v interface{}) int {
 	}
 }
 
-// buildCoverURL creates an Open Library cover URL from ISBN
+// buildCoverURL creates an Open Library cover URL from ISBN (kept for backward compatibility)
 func buildCoverURL(isbn, isbn13 interface{}) string {
-	// Prefer ISBN-13
-	if s := toString(isbn13); s != "" && s != "0" {
-		return fmt.Sprintf("https://covers.openlibrary.org/b/isbn/%s-M.jpg", s)
-	}
-	if s := toString(isbn); s != "" && s != "0" {
-		return fmt.Sprintf("https://covers.openlibrary.org/b/isbn/%s-M.jpg", s)
-	}
-	return ""
+	return covers.CoverURLByISBN(covers.PreferISBN(toString(isbn), toString(isbn13)))
 }

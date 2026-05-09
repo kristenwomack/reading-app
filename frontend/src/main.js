@@ -84,9 +84,14 @@ function hideBookList() {
 }
 
 function renderBookCard(book) {
-    let coverHtml = '<div class="book-cover-placeholder">📚</div>';
+    const initial = book.title ? book.title.charAt(0).toUpperCase() : '📚';
+    const placeholderHtml = '<div class="book-cover-placeholder">' + escapeHtml(initial) + '</div>';
+    
+    let coverHtml = placeholderHtml;
     if (book.coverUrl) {
-        coverHtml = '<img src="' + escapeHtml(book.coverUrl) + '" alt="" class="book-cover" loading="lazy" onerror="this.style.display=\'none\'">';
+        coverHtml = '<img src="' + escapeHtml(book.coverUrl) + '" alt="" class="book-cover" loading="lazy" ' +
+            'onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">' +
+            '<div class="book-cover-placeholder" style="display:none">' + escapeHtml(initial) + '</div>';
     }
     
     return '<div class="book-card">' +

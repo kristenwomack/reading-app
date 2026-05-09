@@ -166,6 +166,12 @@ function setupEventListeners() {
     
     // ISBN field change - show cover preview
     document.getElementById('isbn').addEventListener('change', updateCoverPreview);
+    
+    // Manual cover URL change - update preview
+    const coverUrlInput = document.getElementById('coverUrl');
+    if (coverUrlInput) {
+        coverUrlInput.addEventListener('change', updateCoverPreview);
+    }
 }
 
 // Handle login
@@ -238,7 +244,7 @@ async function handleAddBook(e) {
         isbn: formData.get('isbn') || '',
         shelf: formData.get('shelf') || 'read',
         review: formData.get('review') || '',
-        coverUrl: getCoverUrl(formData.get('isbn'))
+        coverUrl: formData.get('coverUrl') || getCoverUrl(formData.get('isbn'))
     };
     
     try {
@@ -407,9 +413,11 @@ function getCoverUrl(isbn) {
 }
 
 function updateCoverPreview() {
+    const manualUrl = document.getElementById('coverUrl')?.value.trim();
     const isbn = document.getElementById('isbn').value.trim();
-    if (isbn) {
-        const url = getCoverUrl(isbn);
+    const url = manualUrl || (isbn ? getCoverUrl(isbn) : '');
+    
+    if (url) {
         coverImage.src = url;
         coverImage.onerror = () => {
             coverPreview.classList.add('hidden');
