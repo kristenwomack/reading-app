@@ -176,6 +176,10 @@ func main() {
 			http.ServeFile(w, r, filepath.Join(frontendDir, "admin.html"))
 			return
 		}
+		// Prevent caching of JS/CSS files during development
+		if strings.HasSuffix(r.URL.Path, ".js") || strings.HasSuffix(r.URL.Path, ".css") {
+			w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+		}
 		fs.ServeHTTP(w, r)
 	})
 	
