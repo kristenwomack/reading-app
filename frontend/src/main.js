@@ -157,7 +157,8 @@ async function init() {
         populateYearSelector(yearsData.years);
         
         const hasCurrentYear = yearsData.years.some(y => y.year === currentYear);
-        const defaultYear = hasCurrentYear ? currentYear : yearsData.years[0].year;
+        const sortedYears = [...yearsData.years].sort((a, b) => b.year - a.year);
+        const defaultYear = hasCurrentYear ? currentYear : sortedYears[0].year;
         
         document.getElementById('year-selector').value = defaultYear;
         
