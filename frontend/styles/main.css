@@ -39,14 +39,14 @@ body {
     line-height: 1.6;
     color: var(--color-text);
     background-color: var(--color-bg);
-    padding: 40px 24px;
+    padding: 24px;
     -webkit-font-smoothing: antialiased;
 }
 
 /* Header */
 header {
     max-width: 1200px;
-    margin: 0 auto 48px;
+    margin: 0 auto 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -64,12 +64,15 @@ h1 span {
 }
 
 #year-selector {
-    padding: 10px 16px;
-    font-size: 0.95rem;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding: 6px 28px 6px 10px;
+    font-size: 0.9rem;
     font-weight: 500;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
-    background: var(--color-surface);
+    background: var(--color-surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23a9b1d6'/%3E%3C/svg%3E") no-repeat right 10px center;
     color: var(--color-text);
     cursor: pointer;
     transition: border-color 0.2s, box-shadow 0.2s;
@@ -96,47 +99,47 @@ main {
     margin: 0 auto;
 }
 
-/* Dashboard Layout */
-@media (min-width: 769px) {
-    .dashboard-layout {
-        display: grid;
-        grid-template-columns: 280px 1fr;
-        gap: 40px;
-        align-items: start;
-    }
+/* Stats Bar - Horizontal Layout */
+.stats-bar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+    align-items: stretch;
 }
 
-@media (max-width: 768px) {
-    .dashboard-layout {
-        display: flex;
-        flex-direction: column;
-        gap: 28px;
-    }
+.stats-bar .summary-card {
+    flex: 1.5;
+    min-width: 0;
+}
+
+.stats-bar .stat-card {
+    flex: 1;
+    min-width: 0;
 }
 
 /* Summary Card */
 .summary-card {
     background: var(--color-surface);
-    padding: 28px;
+    padding: 16px 20px;
     border-radius: var(--radius-md);
     border: 1px solid var(--color-border);
 }
 
 .summary-title {
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     font-weight: 600;
     color: var(--color-text-muted);
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    margin-bottom: 20px;
-    padding-bottom: 16px;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
     border-bottom: 1px solid var(--color-border-muted);
 }
 
 .stats-list {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 6px;
 }
 
 .stat-row {
@@ -146,19 +149,19 @@ main {
 }
 
 .stat-label {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     color: var(--color-text-secondary);
 }
 
 .stat-value {
-    font-size: 1.25rem;
+    font-size: 1.1rem;
     font-weight: 600;
     color: var(--color-text);
 }
 
 .summary-card.empty-state {
     text-align: center;
-    padding: 40px 24px;
+    padding: 20px 16px;
 }
 
 .empty-message {
@@ -176,10 +179,10 @@ main {
 /* Goal Progress */
 #goal-progress {
     background: var(--color-surface);
-    padding: 24px;
+    padding: 16px 24px;
     border-radius: var(--radius-md);
     border: 1px solid var(--color-border);
-    margin-bottom: 28px;
+    margin-bottom: 16px;
 }
 
 .goal-header {
@@ -223,39 +226,29 @@ main {
     text-align: right;
 }
 
-/* Summary Section */
-.summary-section {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
 /* Stats Cards */
-#statistics {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
 .stat-card {
     background: var(--color-surface);
-    padding: 24px;
+    padding: 16px 20px;
     border-radius: var(--radius-md);
     border: 1px solid var(--color-border);
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .stat-card h2 {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 600;
     color: var(--color-text-muted);
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
 }
 
 .stat-card .stat-value {
-    font-size: 2rem;
+    font-size: 1.5rem;
     font-weight: 700;
     color: var(--color-accent);
     letter-spacing: -0.02em;
@@ -264,17 +257,17 @@ main {
 /* Chart Container */
 #chart-container {
     background: var(--color-surface);
-    padding: 28px;
+    padding: 20px 28px;
     border-radius: var(--radius-md);
     border: 1px solid var(--color-border);
-    margin-bottom: 36px;
+    margin-bottom: 0;
 }
 
 #chart-container h2 {
     font-size: 1rem;
     font-weight: 600;
     color: var(--color-text);
-    margin-bottom: 24px;
+    margin-bottom: 12px;
 }
 
 #monthly-chart {
@@ -330,7 +323,14 @@ main {
     padding: 28px;
     border-radius: var(--radius-md);
     border: 1px solid var(--color-border);
-    margin-top: 36px;
+    margin-top: 0;
+}
+
+/* Section Divider */
+.section-divider {
+    border: none;
+    border-top: 1px solid var(--color-border-muted);
+    margin: 24px 0;
 }
 
 .book-list-header {
@@ -454,31 +454,45 @@ main {
 /* Responsive */
 @media (max-width: 768px) {
     body {
-        padding: 20px 16px;
+        padding: 16px 16px;
     }
     
     header {
         flex-direction: column;
-        gap: 16px;
+        gap: 12px;
         text-align: center;
-        margin-bottom: 28px;
+        margin-bottom: 20px;
     }
     
     h1 {
         font-size: 1.5rem;
     }
+
+    .stats-bar {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .stats-bar .summary-card {
+        flex-basis: 100%;
+    }
+
+    .stats-bar .stat-card {
+        flex: 1;
+        min-width: 0;
+    }
     
     .stat-card {
-        padding: 20px;
+        padding: 12px 16px;
     }
     
     .stat-card .stat-value {
-        font-size: 1.75rem;
+        font-size: 1.25rem;
     }
     
     #chart-container,
     #book-list-section {
-        padding: 20px;
+        padding: 16px;
     }
     
     .book-grid {

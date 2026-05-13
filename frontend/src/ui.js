@@ -88,7 +88,7 @@ export function showError(message) {
 }
 
 export function showContent() {
-    document.getElementById('statistics').style.display = 'grid';
+    document.getElementById('statistics').style.display = 'flex';
     document.getElementById('chart-container').style.display = 'block';
     document.getElementById('empty-state').classList.add('hidden');
     document.getElementById('error-state').classList.add('hidden');
