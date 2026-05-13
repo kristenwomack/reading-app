@@ -6,21 +6,25 @@ describe('Dashboard Layout Tests', () => {
     document.body.innerHTML = `
       <main>
         <section id="statistics" class="stats-bar">
-          <div class="summary-card">
-            <h2 class="summary-title">2025 Summary</h2>
-            <div class="stats-list"></div>
+          <div class="stat-card">
+            <span class="stat-emoji">📚</span>
+            <p class="stat-value" id="stat-books">0</p>
+            <h2>Books</h2>
           </div>
           <div class="stat-card">
-            <h2>Total Books</h2>
-            <p class="stat-value" id="total-books">0</p>
+            <span class="stat-emoji">📄</span>
+            <p class="stat-value" id="stat-pages">0</p>
+            <h2>Pages</h2>
           </div>
           <div class="stat-card">
-            <h2>Average per Month</h2>
+            <span class="stat-emoji">📊</span>
+            <p class="stat-value" id="stat-avg-pages">0</p>
+            <h2>Avg Pages</h2>
+          </div>
+          <div class="stat-card">
+            <span class="stat-emoji">📅</span>
             <p class="stat-value" id="avg-per-month">0.0</p>
-          </div>
-          <div class="stat-card">
-            <h2>Total Pages</h2>
-            <p class="stat-value" id="total-pages">0</p>
+            <h2>Per Month</h2>
           </div>
         </section>
         <section id="chart-container"></section>
@@ -30,17 +34,13 @@ describe('Dashboard Layout Tests', () => {
   });
 
   // T002: Stats bar layout test
-  it('stats bar renders as horizontal flex row', () => {
+  it('stats bar renders as horizontal flex row with 4 stat cards', () => {
     const statsBar = document.querySelector('.stats-bar');
-    const summaryCard = document.querySelector('.summary-card');
     const statCards = document.querySelectorAll('.stat-card');
 
     expect(statsBar).toBeTruthy();
-    expect(summaryCard).toBeTruthy();
-    expect(statCards).toHaveLength(3);
+    expect(statCards).toHaveLength(4);
 
-    // All stat cards and summary card are direct children of stats-bar
-    expect(statsBar.contains(summaryCard)).toBe(true);
     statCards.forEach(card => {
       expect(statsBar.contains(card)).toBe(true);
     });
@@ -55,84 +55,34 @@ describe('Dashboard Layout Tests', () => {
     expect(bookListSection.parentElement).toBe(main);
   });
 
-  // T004: Summary card content test
-  it('summary card displays correct statistics', () => {
-    // Mock API response
-    const mockStats = {
-      year: 2025,
-      total_books: 42,
-      total_pages: 12450,
-      avg_pages_per_book: 296
-    };
+  // T004: Stat cards display correct values
+  it('stat cards display correct statistics when populated', () => {
+    document.getElementById('stat-books').textContent = '42';
+    document.getElementById('stat-pages').textContent = '12,450';
+    document.getElementById('stat-avg-pages').textContent = '296';
+    document.getElementById('avg-per-month').textContent = '3.5';
 
-    // Create summary card HTML
-    const summaryCard = document.querySelector('.summary-card');
-    summaryCard.innerHTML = `
-      <h2 class="summary-title">2025 Summary</h2>
-      <div class="stats-list">
-        <div class="stat-row">
-          <span class="stat-label">Total Books</span>
-          <span class="stat-value">42</span>
-        </div>
-        <div class="stat-row">
-          <span class="stat-label">Total Pages</span>
-          <span class="stat-value">12,450</span>
-        </div>
-        <div class="stat-row">
-          <span class="stat-label">Avg Pages/Book</span>
-          <span class="stat-value">296</span>
-        </div>
-      </div>
-    `;
-
-    // Assert card title
-    const title = summaryCard.querySelector('.summary-title');
-    expect(title.textContent).toBe('2025 Summary');
-
-    // Assert stat rows
-    const statRows = summaryCard.querySelectorAll('.stat-row');
-    expect(statRows).toHaveLength(3);
-
-    // Check Total Books
-    expect(statRows[0].querySelector('.stat-label').textContent).toBe('Total Books');
-    expect(statRows[0].querySelector('.stat-value').textContent).toBe('42');
-
-    // Check Total Pages (with comma separator)
-    expect(statRows[1].querySelector('.stat-label').textContent).toBe('Total Pages');
-    expect(statRows[1].querySelector('.stat-value').textContent).toBe('12,450');
-
-    // Check Avg Pages/Book
-    expect(statRows[2].querySelector('.stat-label').textContent).toBe('Avg Pages/Book');
-    expect(statRows[2].querySelector('.stat-value').textContent).toBe('296');
+    expect(document.getElementById('stat-books').textContent).toBe('42');
+    expect(document.getElementById('stat-pages').textContent).toBe('12,450');
+    expect(document.getElementById('stat-avg-pages').textContent).toBe('296');
+    expect(document.getElementById('avg-per-month').textContent).toBe('3.5');
   });
 
-  // T005: Empty state test
-  it('summary card shows empty state when no books', () => {
-    // Mock API response with 0 books
-    const mockStats = {
-      year: 2024,
-      total_books: 0,
-      total_pages: 0,
-      avg_pages_per_book: 0
-    };
+  // T005: Each stat card has an emoji
+  it('each stat card has an emoji icon', () => {
+    const emojis = document.querySelectorAll('.stat-emoji');
+    expect(emojis).toHaveLength(4);
+    expect(emojis[0].textContent).toBe('📚');
+    expect(emojis[1].textContent).toBe('📄');
+    expect(emojis[2].textContent).toBe('📊');
+    expect(emojis[3].textContent).toBe('📅');
+  });
 
-    // Create empty state HTML
-    const summaryCard = document.querySelector('.summary-card');
-    summaryCard.classList.add('empty-state');
-    summaryCard.innerHTML = `
-      <h2 class="summary-title">2024 Summary</h2>
-      <p class="empty-message">No books tracked for this year</p>
-    `;
-
-    // Assert empty state
-    const title = summaryCard.querySelector('.summary-title');
-    expect(title.textContent).toBe('2024 Summary');
-
-    const emptyMessage = summaryCard.querySelector('.empty-message');
-    expect(emptyMessage).toBeTruthy();
-    expect(emptyMessage.textContent).toContain('No books tracked');
-
-    // Ensure no error rendering
-    expect(summaryCard).toBeTruthy();
+  // T006: Empty state shows zeros
+  it('stat cards show zero values when no books', () => {
+    expect(document.getElementById('stat-books').textContent).toBe('0');
+    expect(document.getElementById('stat-pages').textContent).toBe('0');
+    expect(document.getElementById('stat-avg-pages').textContent).toBe('0');
+    expect(document.getElementById('avg-per-month').textContent).toBe('0.0');
   });
 });

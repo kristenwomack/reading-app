@@ -27,47 +27,22 @@ export function formatNumber(num) {
     return num.toLocaleString('en-US');
 }
 
-// T010: Render summary card with reading statistics
-export function renderSummaryCard(stats) {
-    const summaryCard = document.querySelector('.summary-card');
-    if (!summaryCard) return;
+// T010: Render individual stat cards with reading statistics
+export function renderStatCards(stats) {
+    const booksEl = document.getElementById('stat-books');
+    const pagesEl = document.getElementById('stat-pages');
+    const avgPagesEl = document.getElementById('stat-avg-pages');
 
-    // Update title
-    const summaryTitle = summaryCard.querySelector('.summary-title');
-    if (summaryTitle) {
-        summaryTitle.textContent = `${stats.year} Summary`;
-    }
-
-    // Handle empty state (0 books)
     if (stats.totalBooks === 0) {
-        summaryCard.classList.add('empty-state');
-        summaryCard.querySelector('.stats-list').innerHTML = `
-            <p class="empty-message">No books tracked for this year</p>
-        `;
+        if (booksEl) booksEl.textContent = '0';
+        if (pagesEl) pagesEl.textContent = '0';
+        if (avgPagesEl) avgPagesEl.textContent = '0';
         return;
     }
 
-    // Remove empty state class if it exists
-    summaryCard.classList.remove('empty-state');
-
-    // Render stat rows
-    const statsList = summaryCard.querySelector('.stats-list');
-    if (statsList) {
-        statsList.innerHTML = `
-            <div class="stat-row">
-                <span class="stat-label">Total Books</span>
-                <span class="stat-value">${stats.totalBooks}</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Total Pages</span>
-                <span class="stat-value">${formatNumber(stats.totalPages)}</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Avg Pages/Book</span>
-                <span class="stat-value">${stats.averagePagesPerBook || Math.floor(stats.totalPages / stats.totalBooks)}</span>
-            </div>
-        `;
-    }
+    if (booksEl) booksEl.textContent = stats.totalBooks;
+    if (pagesEl) pagesEl.textContent = formatNumber(stats.totalPages);
+    if (avgPagesEl) avgPagesEl.textContent = stats.averagePagesPerBook || Math.floor(stats.totalPages / stats.totalBooks);
 }
 
 

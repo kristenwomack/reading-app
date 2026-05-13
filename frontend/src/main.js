@@ -1,7 +1,7 @@
 // Main application entry point
 import { fetchYears, fetchStats, fetchBooks, fetchGoal } from './api-client.js';
 import { renderChart } from './chart.js';
-import { populateYearSelector, updateStatistics, renderSummaryCard, showEmptyState, showError, showContent } from './ui.js';
+import { populateYearSelector, updateStatistics, renderStatCards, showEmptyState, showError, showContent } from './ui.js';
 
 let currentYear = new Date().getFullYear();
 
@@ -14,7 +14,7 @@ async function loadYearData(year) {
         ]);
         const goal = goalData?.target ?? null;
         
-        renderSummaryCard(stats);
+        renderStatCards(stats);
         
         if (stats.totalBooks === 0) {
             showEmptyState(year);
