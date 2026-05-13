@@ -103,7 +103,7 @@ func GetBooks(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := validateYear(year); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		writeValidationError(w, []string{err.Error()})
 		return
 	}
 
@@ -206,7 +206,7 @@ func GetStats(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := validateYear(year); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		writeValidationError(w, []string{err.Error()})
 		return
 	}
 	

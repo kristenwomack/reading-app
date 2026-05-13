@@ -695,6 +695,33 @@ func TestGetGoalInvalidYear(t *testing.T) {
 	}
 }
 
+// TestGetGoalOutOfRangeYear verifies JSON error for out-of-range year values
+func TestGetGoalOutOfRangeYear(t *testing.T) {
+	s := setupTestStore(t)
+	defer teardownTestStore(t, s)
+
+	for _, year := range []string{"1899", "2101"} {
+		t.Run("year="+year, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, "/api/goals/"+year, nil)
+			w := httptest.NewRecorder()
+
+			GetGoal(w, req)
+
+			if w.Code != http.StatusBadRequest {
+				t.Errorf("Expected status %d, got %d", http.StatusBadRequest, w.Code)
+			}
+
+			var resp map[string]interface{}
+			if err := json.NewDecoder(w.Body).Decode(&resp); err != nil {
+				t.Fatalf("Expected JSON response, got: %s", w.Body.String())
+			}
+			if resp["error"] != "Validation failed" {
+				t.Errorf("Expected error 'Validation failed', got %v", resp["error"])
+			}
+		})
+	}
+}
+
 // TestGetGoalWrongMethod verifies error with wrong HTTP method
 func TestGetGoalWrongMethod(t *testing.T) {
 	// Create POST request instead of GET

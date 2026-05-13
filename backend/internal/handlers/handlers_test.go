@@ -192,6 +192,32 @@ func TestGetBooksInvalidYear(t *testing.T) {
 	}
 }
 
+// TestGetBooksOutOfRangeYear verifies JSON error for out-of-range year values
+func TestGetBooksOutOfRangeYear(t *testing.T) {
+	SetBooks(setupTestBooks())
+
+	for _, year := range []string{"1899", "2101"} {
+		t.Run("year="+year, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, "/api/books?year="+year, nil)
+			w := httptest.NewRecorder()
+
+			GetBooks(w, req)
+
+			if w.Code != http.StatusBadRequest {
+				t.Errorf("Expected status %d, got %d", http.StatusBadRequest, w.Code)
+			}
+
+			var resp map[string]interface{}
+			if err := json.NewDecoder(w.Body).Decode(&resp); err != nil {
+				t.Fatalf("Expected JSON response, got: %s", w.Body.String())
+			}
+			if resp["error"] != "Validation failed" {
+				t.Errorf("Expected error 'Validation failed', got %v", resp["error"])
+			}
+		})
+	}
+}
+
 // TestGetBooksWithShelfFilter verifies filtering by shelf
 func TestGetBooksWithShelfFilter(t *testing.T) {
 	// Setup
@@ -343,6 +369,32 @@ func TestGetStatsInvalidYear(t *testing.T) {
 	// Verify response code
 	if w.Code != http.StatusBadRequest {
 		t.Errorf("Expected status %d, got %d", http.StatusBadRequest, w.Code)
+	}
+}
+
+// TestGetStatsOutOfRangeYear verifies JSON error for out-of-range year values
+func TestGetStatsOutOfRangeYear(t *testing.T) {
+	SetBooks(setupTestBooks())
+
+	for _, year := range []string{"1899", "2101"} {
+		t.Run("year="+year, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, "/api/stats?year="+year, nil)
+			w := httptest.NewRecorder()
+
+			GetStats(w, req)
+
+			if w.Code != http.StatusBadRequest {
+				t.Errorf("Expected status %d, got %d", http.StatusBadRequest, w.Code)
+			}
+
+			var resp map[string]interface{}
+			if err := json.NewDecoder(w.Body).Decode(&resp); err != nil {
+				t.Fatalf("Expected JSON response, got: %s", w.Body.String())
+			}
+			if resp["error"] != "Validation failed" {
+				t.Errorf("Expected error 'Validation failed', got %v", resp["error"])
+			}
+		})
 	}
 }
 
