@@ -32,7 +32,7 @@ export function renderChart(container, monthlyData, goal = null) {
     const margin = { top: 20, right: 60, bottom: 40, left: 50 };
     const containerWidth = container.clientWidth || 600;
     const width = containerWidth - margin.left - margin.right;
-    const height = Math.round(containerWidth / 1.618) - margin.top - margin.bottom;
+    const height = Math.min(180, Math.round(containerWidth / 3.5)) - margin.top - margin.bottom;
 
     const svgHeight = height + margin.top + margin.bottom;
     const svg = d3.select(container)

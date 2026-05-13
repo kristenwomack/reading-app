@@ -20,69 +20,67 @@
     </header>
 
     <main>
-        <div class="dashboard-layout">
-            <aside class="summary-section">
-                <div class="summary-card">
-                    <h2 class="summary-title">2025 Summary</h2>
-                    <div class="stats-list">
-                        <!-- Stats populated by JavaScript -->
-                    </div>
+        <!-- Stats bar - horizontal, full width -->
+        <section id="statistics" class="stats-bar">
+            <div class="summary-card">
+                <h2 class="summary-title">2025 Summary</h2>
+                <div class="stats-list">
+                    <!-- Stats populated by JavaScript -->
                 </div>
-
-                <section id="statistics">
-                    <div class="stat-card">
-                        <h2>Total Books</h2>
-                        <p class="stat-value" id="total-books">0</p>
-                    </div>
-                    <div class="stat-card">
-                        <h2>Average per Month</h2>
-                        <p class="stat-value" id="avg-per-month">0.0</p>
-                    </div>
-                    <div class="stat-card">
-                        <h2>Total Pages</h2>
-                        <p class="stat-value" id="total-pages">0</p>
-                    </div>
-                </section>
-            </aside>
-
-            <div class="charts-section">
-                <!-- Goal Progress (hidden if no goal set) -->
-                <section id="goal-progress" class="hidden">
-                    <div class="goal-header">
-                        <h2 id="goal-title">2025 Goal</h2>
-                        <span id="goal-stats">0 of 0 books</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
-                    </div>
-                    <p class="goal-percent" id="goal-percent">0% complete</p>
-                </section>
-
-                <section id="chart-container">
-                    <h2>Monthly Breakdown</h2>
-                    <div id="monthly-chart"></div>
-                </section>
-
-                <!-- Book List Section -->
-                <section id="book-list-section">
-                    <div class="book-list-header">
-                        <h2>Books Read</h2>
-                        <span id="book-count" class="book-count"></span>
-                    </div>
-                    <div id="book-list" class="book-grid">
-                        <p style="color: #7f8c8d; text-align: center; padding: 20px;">Loading books...</p>
-                    </div>
-                </section>
-
-                <section id="empty-state" class="hidden">
-                    <p>No books tracked yet for <span id="empty-year"></span>. Start reading!</p>
-                </section>
-
-                <section id="error-state" class="hidden">
-                    <p id="error-message">Unable to load reading data</p>
-                </section>
             </div>
-        </div>
+            <div class="stat-card">
+                <h2>Total Books</h2>
+                <p class="stat-value" id="total-books">0</p>
+            </div>
+            <div class="stat-card">
+                <h2>Average per Month</h2>
+                <p class="stat-value" id="avg-per-month">0.0</p>
+            </div>
+            <div class="stat-card">
+                <h2>Total Pages</h2>
+                <p class="stat-value" id="total-pages">0</p>
+            </div>
+        </section>
+
+        <!-- Goal Progress (hidden if no goal set) -->
+        <section id="goal-progress" class="hidden">
+            <div class="goal-header">
+                <h2 id="goal-title">2025 Goal</h2>
+                <span id="goal-stats">0 of 0 books</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+            </div>
+            <p class="goal-percent" id="goal-percent">0% complete</p>
+        </section>
+
+        <!-- Chart -->
+        <section id="chart-container">
+            <h2>Monthly Breakdown</h2>
+            <div id="monthly-chart"></div>
+        </section>
+
+        <!-- Divider between metrics and books -->
+        <hr class="section-divider" />
+
+        <!-- Book list - full width -->
+        <section id="book-list-section">
+            <div class="book-list-header">
+                <h2>Books Read</h2>
+                <span id="book-count" class="book-count"></span>
+            </div>
+            <div id="book-list" class="book-grid">
+                <p style="color: #7f8c8d; text-align: center; padding: 20px;">Loading books...</p>
+            </div>
+        </section>
+
+        <section id="empty-state" class="hidden">
+            <p>No books tracked yet for <span id="empty-year"></span>. Start reading!</p>
+        </section>
+
+        <section id="error-state" class="hidden">
+            <p id="error-message">Unable to load reading data</p>
+        </section>
     </main>
 
     <script type="module" src="src/main.js"></script>
