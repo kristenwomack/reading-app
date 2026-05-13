@@ -118,8 +118,8 @@ func CreateBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.Title == "" || req.Author == "" {
-		http.Error(w, "Title and author are required", http.StatusBadRequest)
+	if errs := validateBookRequest(req, false); len(errs) > 0 {
+		writeValidationError(w, errs)
 		return
 	}
 
@@ -173,6 +173,11 @@ func UpdateBook(w http.ResponseWriter, r *http.Request) {
 	var req BookRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
+	if errs := validateBookRequest(req, true); len(errs) > 0 {
+		writeValidationError(w, errs)
 		return
 	}
 
@@ -297,6 +302,11 @@ func GetGoal(w http.ResponseWriter, r *http.Request) {
 	year, err := strconv.Atoi(path)
 	if err != nil {
 		http.Error(w, "Invalid year", http.StatusBadRequest)
+		return
+	}
+
+	if err := validateYear(year); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 

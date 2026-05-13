@@ -102,6 +102,11 @@ func GetBooks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err := validateYear(year); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
 	// Optional filters
 	shelfFilter := r.URL.Query().Get("shelf")
 	monthStr := r.URL.Query().Get("month")
@@ -197,6 +202,11 @@ func GetStats(w http.ResponseWriter, r *http.Request) {
 	year, err := strconv.Atoi(yearStr)
 	if err != nil {
 		http.Error(w, "invalid year parameter", http.StatusBadRequest)
+		return
+	}
+
+	if err := validateYear(year); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	
