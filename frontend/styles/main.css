@@ -115,21 +115,20 @@ main {
 /* Stats Cards */
 .stat-card {
     background: var(--color-surface);
-    padding: 16px 20px;
+    padding: 10px 16px;
     border-radius: var(--radius-md);
     border: 1px solid var(--color-border);
     text-align: center;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     justify-content: center;
-    gap: 2px;
+    gap: 8px;
 }
 
 .stat-emoji {
-    font-size: 1.25rem;
+    font-size: 1.1rem;
     line-height: 1;
-    margin-bottom: 2px;
 }
 
 .stat-card h2 {
@@ -142,7 +141,7 @@ main {
 }
 
 .stat-card .stat-value {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     font-weight: 700;
     color: var(--color-accent);
     letter-spacing: -0.02em;
@@ -422,11 +421,19 @@ main {
     }
     
     .stat-card {
-        padding: 12px 16px;
+        padding: 8px 10px;
     }
     
     .stat-card .stat-value {
-        font-size: 1.25rem;
+        font-size: 1rem;
+    }
+
+    .stat-card h2 {
+        font-size: 0.6rem;
+    }
+
+    .stat-emoji {
+        font-size: 0.9rem;
     }
     
     #chart-container,
