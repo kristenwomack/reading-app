@@ -176,7 +176,7 @@ func UpdateBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if errs := validateBookRequest(req, true); len(errs) > 0 {
+	if errs := validateBookRequest(req, false); len(errs) > 0 {
 		writeValidationError(w, errs)
 		return
 	}
