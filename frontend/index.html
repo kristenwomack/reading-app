@@ -20,17 +20,27 @@
     </header>
 
     <main>
-        <!-- Stats bar - horizontal, full width -->
+        <!-- Stats bar - individual stat cards -->
         <section id="statistics" class="stats-bar">
-            <div class="summary-card">
-                <h2 class="summary-title">2025 Summary</h2>
-                <div class="stats-list">
-                    <!-- Stats populated by JavaScript -->
-                </div>
+            <div class="stat-card">
+                <span class="stat-emoji">📚</span>
+                <p class="stat-value" id="stat-books">0</p>
+                <h2>Books</h2>
             </div>
             <div class="stat-card">
-                <h2>Average per Month</h2>
+                <span class="stat-emoji">📄</span>
+                <p class="stat-value" id="stat-pages">0</p>
+                <h2>Pages</h2>
+            </div>
+            <div class="stat-card">
+                <span class="stat-emoji">📊</span>
+                <p class="stat-value" id="stat-avg-pages">0</p>
+                <h2>Avg Pages</h2>
+            </div>
+            <div class="stat-card">
+                <span class="stat-emoji">📅</span>
                 <p class="stat-value" id="avg-per-month">0.0</p>
+                <h2>Per Month</h2>
             </div>
             <span id="total-books" hidden>0</span>
             <span id="total-pages" hidden>0</span>
