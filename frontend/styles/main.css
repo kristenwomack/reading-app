@@ -431,7 +431,7 @@ main {
     }
 
     .stat-card h2 {
-        font-size: 0.6rem;
+        font-size: clamp(0.7rem, 1.8vw, 0.8rem);
     }
 
     .stat-emoji {
