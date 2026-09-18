@@ -452,6 +452,81 @@ func TestUpdateBookWrongMethod(t *testing.T) {
 	}
 }
 
+// TestUpdateBookMissingRequiredFields verifies that PUT requires title and author
+func TestUpdateBookMissingRequiredFields(t *testing.T) {
+	s := setupTestStore(t)
+	defer teardownTestStore(t, s)
+
+	// Create a book so we have a valid ID
+	book := &store.Book{Title: "Original", Author: "Author", Shelf: "read"}
+	id, err := s.CreateBook(book)
+	if err != nil {
+		t.Fatalf("Failed to create book: %v", err)
+	}
+
+	tests := []struct {
+		name string
+		body map[string]interface{}
+		want []string
+	}{
+		{
+			name: "missing title",
+			body: map[string]interface{}{"author": "Some Author"},
+			want: []string{"title is required"},
+		},
+		{
+			name: "missing author",
+			body: map[string]interface{}{"title": "Some Title"},
+			want: []string{"author is required"},
+		},
+		{
+			name: "missing both",
+			body: map[string]interface{}{},
+			want: []string{"title is required", "author is required"},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			bodyBytes, _ := json.Marshal(tc.body)
+			idStr := fmt.Sprintf("%d", id)
+			req := httptest.NewRequest(http.MethodPut, "/api/books/"+idStr, bytes.NewBuffer(bodyBytes))
+			req.URL.Path = "/api/books/" + idStr
+			w := httptest.NewRecorder()
+
+			UpdateBook(w, req)
+
+			if w.Code != http.StatusBadRequest {
+				t.Errorf("Expected status %d, got %d", http.StatusBadRequest, w.Code)
+			}
+
+			var resp map[string]interface{}
+			if err := json.NewDecoder(w.Body).Decode(&resp); err != nil {
+				t.Fatalf("Failed to decode response: %v", err)
+			}
+			if resp["error"] != "Validation failed" {
+				t.Errorf("Expected error 'Validation failed', got %v", resp["error"])
+			}
+			fields, ok := resp["fields"].([]interface{})
+			if !ok {
+				t.Fatalf("Expected fields to be a slice, got %T", resp["fields"])
+			}
+			for _, want := range tc.want {
+				found := false
+				for _, f := range fields {
+					if f.(string) == want {
+						found = true
+						break
+					}
+				}
+				if !found {
+					t.Errorf("Expected field error %q in %v", want, fields)
+				}
+			}
+		})
+	}
+}
+
 // TestDeleteBook verifies deleting a book
 func TestDeleteBook(t *testing.T) {
 	// Setup test database
@@ -617,6 +692,33 @@ func TestGetGoalInvalidYear(t *testing.T) {
 	// Verify response code
 	if w.Code != http.StatusBadRequest {
 		t.Errorf("Expected status %d, got %d", http.StatusBadRequest, w.Code)
+	}
+}
+
+// TestGetGoalOutOfRangeYear verifies JSON error for out-of-range year values
+func TestGetGoalOutOfRangeYear(t *testing.T) {
+	s := setupTestStore(t)
+	defer teardownTestStore(t, s)
+
+	for _, year := range []string{"1899", "2101"} {
+		t.Run("year="+year, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, "/api/goals/"+year, nil)
+			w := httptest.NewRecorder()
+
+			GetGoal(w, req)
+
+			if w.Code != http.StatusBadRequest {
+				t.Errorf("Expected status %d, got %d", http.StatusBadRequest, w.Code)
+			}
+
+			var resp map[string]interface{}
+			if err := json.NewDecoder(w.Body).Decode(&resp); err != nil {
+				t.Fatalf("Expected JSON response, got: %s", w.Body.String())
+			}
+			if resp["error"] != "Validation failed" {
+				t.Errorf("Expected error 'Validation failed', got %v", resp["error"])
+			}
+		})
 	}
 }
 
