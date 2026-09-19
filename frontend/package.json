@@ -4,9 +4,11 @@
   "description": "Frontend for reading tracker application",
   "type": "module",
   "scripts": {
-    "test": "vitest",
+    "build": "node build.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "test:ui": "vitest --ui",
-    "coverage": "vitest --coverage"
+    "coverage": "vitest run --coverage"
   },
   "devDependencies": {
     "happy-dom": "^12.10.3",

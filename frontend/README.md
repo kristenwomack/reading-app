@@ -1,84 +1,59 @@
 # Reading Tracker Frontend
 
-Static JavaScript frontend for the reading tracker application.
+Static, dependency-free JavaScript frontend for the reading tracker. It reads
+`books.json` and `goals.json` directly in the browser — there is no backend.
 
 ## Prerequisites
 
-- Node.js 18 or later
-- npm 9 or later
-- Backend API running on http://localhost:8080
+- Node.js 18 or later (only for tests and the build script)
 
 ## Setup
 
 ```bash
-# Install dependencies
-npm install
-
-# Run tests
-npm test
-
-# Run tests with UI
-npm run test:ui
-
-# Generate coverage report
+npm install       # install dev dependencies (vitest)
+npm test          # run unit tests once
+npm run test:watch
 npm run coverage
 ```
 
-## How to Access
+## Run locally
 
-The frontend is served by the Go backend at http://localhost:8080
+Build the site (copies frontend assets + `books.json` + `goals.json` into `dist/`)
+and serve it with any static file server:
 
-1. Start the backend server: `cd ../backend && go run main.go`
-2. Open browser to http://localhost:8080
-3. The frontend will automatically load and fetch data from the API
+```bash
+npm run build
+npx serve dist          # or: python3 -m http.server --directory dist 8000
+```
+
+Then open the served URL. Everything is computed client-side from `books.json`.
 
 ## Project Structure
 
 ```
 frontend/
-├── index.html           # Main HTML page
+├── index.html          # Dashboard page
+├── build.js            # Assembles dist/ for local preview and Pages deploy
 ├── src/
 │   ├── main.js         # Entry point and page initialization
-│   ├── api-client.js   # API communication module
-│   ├── chart.js        # Chart.js integration
+│   ├── data.js         # Loads books.json/goals.json, computes years & stats
+│   ├── api-client.js   # Thin shim delegating to data.js
+│   ├── chart.js        # D3 monthly chart
 │   └── ui.js           # DOM manipulation and UI updates
 ├── styles/
 │   └── main.css        # CSS styling
 └── tests/
-    ├── api-client.test.js
-    ├── chart.test.js
-    ├── ui.test.js
-    └── integration.test.js
+    ├── data.test.js    # Data-layer unit tests
+    └── ui.test.js      # Dashboard DOM tests
 ```
 
-## Features
+## Data model
 
-- **Year Selector**: Choose different years to view reading progress
-- **Statistics Display**: Total books, average per month, total pages
-- **Monthly Chart**: Bar chart showing books read per month
-- **Empty State**: Friendly message when no books for selected year
-- **Error Handling**: Simple error display if data fails to load
+All data comes from two git-tracked files at the repo root:
 
-## Browser Support
+- `books.json` — one object per book (Goodreads-style keys: `Title`, `Author`,
+  `Number of Pages`, `Date Read`, `Shelf`, `ISBN`, `ISBN13`, ...).
+- `goals.json` — `{ "2025": 90, "2026": 90 }` mapping a year to a book target.
 
-- Chrome (last 2 versions)
-- Firefox (last 2 versions)
-- Safari (last 2 versions)
-- Edge (last 2 versions)
-
-## Development
-
-1. Tests are written first (TDD)
-2. Use ES6 modules (type="module")
-3. Vanilla JavaScript (no framework)
-4. Chart.js for visualization only
-
-## API Contract
-
-The frontend expects these API endpoints:
-
-- `GET /api/years` → `{years: [{year: 2025, count: 12}, ...]}`
-- `GET /api/books?year=2025` → `{books: [{title, author, dateRead, pages, month}, ...]}`
-- `GET /api/stats?year=2025` → `{year, totalBooks, totalPages, averagePerMonth, monthlyBreakdown}`
-
-See `../shared/contracts/openapi.yaml` for complete specification.
+To add a book or change a goal, edit these files (via a PR). Merging to `main`
+triggers the GitHub Pages deploy and the live site updates automatically.
