@@ -1,15 +1,14 @@
-# Binaries
-backend/reading-tracker
-backend/run.sh
-
 # Dependencies
 node_modules/
 frontend/node_modules/
 
-# Database
-books.db
-books.db-wal
-books.db-shm
+# Build output
+frontend/dist/
+
+# Local SQLite database (legacy backend)
+*.db
+*.db-wal
+*.db-shm
 
 # Environment (contains secrets)
 .env
@@ -19,4 +18,3 @@ books.db-shm
 # OS files
 .DS_Store
 coverage.out
-*.db

@@ -2,163 +2,117 @@
 
 [![CI](https://github.com/kristenwomack/reading-app/actions/workflows/ci.yml/badge.svg)](https://github.com/kristenwomack/reading-app/actions/workflows/ci.yml)
 
-A personal reading tracker with a modern dashboard and mobile-friendly admin for logging books on the go.
+A personal reading tracker — a static dashboard that visualizes your reading
+progress. It reads a single `books.json` file directly in the browser, so there
+is no backend, no database, and nothing to keep running. It deploys to GitHub
+Pages automatically on every push to `main`.
 
 ## Features
 
-- 📊 **Dashboard** - Visualize reading progress with charts and statistics
-- 📖 **Book List** - Browse books with covers, linked to Open Library
-- 🎯 **Reading Goals** - Set yearly book targets with progress tracking
-- ✏️ **Admin Panel** - Add books from any device with password protection
-- 📷 **ISBN Scanner** - Scan barcodes to auto-fill book details
-- 🔍 **Open Library Integration** - Fetch book info and covers automatically
+- 📊 **Dashboard** — reading stats, a monthly chart, and yearly goal progress
+- 📖 **Book List** — browse books with covers from Open Library
+- 🎯 **Reading Goals** — per-year targets via `goals.json`
+- 🗂️ **Single source of truth** — all data lives in `books.json` (git-tracked)
 
-## Screenshots
+## How it works
 
-The dashboard shows your reading stats, a monthly chart, goal progress, and a list of books read.
+`books.json` (and `goals.json`) at the repo root are the only data sources. The
+frontend fetches them and computes everything — available years, per-year book
+lists, statistics, and the monthly breakdown — entirely in the browser.
+
+Adding a book = editing `books.json` (via a pull request). When the PR merges to
+`main`, the GitHub Pages workflow rebuilds and the live site updates.
 
 ## Quick Start
 
-### Prerequisites
-- Go 1.21 or later
-
-### Run the App
-
 ```bash
-cd backend
-READING_APP_PASSWORD=yourpassword go run main.go
+cd frontend
+npm install
+npm run build          # assembles dist/ (frontend + books.json + goals.json)
+npx serve dist         # or: python3 -m http.server --directory dist 8000
 ```
 
-Open http://localhost:3000 in your browser.
+Open the served URL in your browser.
 
-### Add Books
+## Adding a book
 
-1. Go to http://localhost:3000/admin
-2. Enter your password
-3. Add books manually or scan an ISBN barcode
+Append an entry to `books.json` (Goodreads-style keys) and open a PR:
+
+```json
+{
+  "Title": "Yesteryear",
+  "Author": "Caro Claire Burke",
+  "ISBN": "059380421X",
+  "ISBN13": "9780593804216",
+  "Publisher": "Alfred A. Knopf",
+  "Number of Pages": 400,
+  "Year Published": 2026,
+  "Date Read": "2026/07/26",
+  "Date Added": "2026/07/26",
+  "Shelf": "read"
+}
+```
+
+Only books with `"Shelf": "read"` and a valid `Date Read` (`YYYY/MM/DD`) are
+counted in the dashboard. Covers are derived from the ISBN via Open Library.
+
+## Setting goals
+
+Edit `goals.json` to map a year to a target number of books:
+
+```json
+{
+  "2025": 90,
+  "2026": 90
+}
+```
 
 ## Project Structure
 
 ```
 reading-app/
-├── backend/                  # Go API server
-│   ├── internal/
-│   │   ├── auth/            # JWT authentication
-│   │   ├── books/           # Book loading, filtering, stats
-│   │   ├── handlers/        # HTTP request handlers
-│   │   └── store/           # SQLite database layer
-│   └── main.go              # Server entry point
-├── frontend/                 # Vanilla JavaScript frontend
+├── books.json                # Book data (source of truth)
+├── goals.json                # Per-year reading goals
+├── frontend/                 # Static site
+│   ├── index.html
+│   ├── build.js              # Assembles dist/ for preview and deploy
 │   ├── src/
-│   │   ├── admin.js         # Admin page functionality
-│   │   ├── api-client.js    # API communication
-│   │   ├── chart.js         # Chart.js integration
-│   │   ├── main.js          # Dashboard logic
-│   │   └── ui.js            # DOM manipulation
-│   ├── styles/
-│   │   ├── main.css         # Dashboard styles
-│   │   └── admin.css        # Admin page styles
-│   ├── index.html           # Dashboard
-│   └── admin.html           # Admin panel
-├── books.json                # Initial book data (imported on first run)
-└── books.db                  # SQLite database (created automatically)
+│   │   ├── main.js           # Entry point
+│   │   ├── data.js           # Loads books.json, computes years/stats
+│   │   ├── api-client.js     # Shim delegating to data.js
+│   │   ├── chart.js          # D3 monthly chart
+│   │   └── ui.js             # DOM updates
+│   ├── styles/main.css
+│   └── tests/
+└── .github/workflows/
+    ├── ci.yml                # Tests + build on PRs
+    └── pages.yml             # Deploys to GitHub Pages on push to main
 ```
 
 ## Tech Stack
 
 | Layer | Technology |
 |-------|------------|
-| Backend | Go with standard library + SQLite |
-| Frontend | Vanilla JavaScript, HTML, CSS |
-| Charts | Chart.js |
-| Database | SQLite (via modernc.org/sqlite) |
-| Auth | JWT tokens with bcrypt |
-| Book Data | Open Library API |
-
-## API Endpoints
-
-### Public
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/years` | List available years |
-| GET | `/api/books?year=2025` | Get books for year |
-| GET | `/api/books?year=2025&shelf=read` | Filter by shelf |
-| GET | `/api/stats?year=2025` | Get statistics |
-| GET | `/api/goals/:year` | Get reading goal |
-
-### Protected (requires auth)
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/books` | Add a book |
-| PUT | `/api/books/:id` | Update a book |
-| DELETE | `/api/books/:id` | Delete a book |
-| POST | `/api/goals` | Set reading goal |
-| POST | `/api/auth/login` | Login |
-| POST | `/api/auth/logout` | Logout |
-
-## Configuration
-
-| Environment Variable | Description | Default |
-|---------------------|-------------|---------|
-| `READING_APP_PASSWORD` | Password for admin access | (required) |
-| `DATABASE_PATH` | Path to SQLite database file | `../books.db` |
-| `PORT` | Server port (set automatically by Railway) | `3000` |
-| `ALLOWED_ORIGINS` | Comma-separated list of allowed CORS origins | `http://localhost:3000` |
+| Frontend | Vanilla JavaScript (ES modules), HTML, CSS |
+| Charts | D3.js |
+| Data | Static `books.json` / `goals.json` |
+| Book covers | Open Library |
+| Hosting | GitHub Pages |
+| Tests | Vitest |
 
 ## Development
 
-### Run Backend
 ```bash
-cd backend
-go run main.go
-```
-
-### Run Tests
-```bash
-cd backend && go test ./...
-cd frontend && npm test
-```
-
-### Build for Production
-```bash
-cd backend
-go build -o reading-tracker main.go
-READING_APP_PASSWORD=secret ./reading-tracker
+cd frontend
+npm test          # run unit tests
+npm run build     # build the static site into dist/
 ```
 
 ## Deployment
 
-### Railway (Recommended)
-
-Deploy the full app to [Railway](https://railway.com) with automatic HTTPS:
-
-1. **Create a Railway account** at [railway.com](https://railway.com)
-2. **Create a new project** → "Deploy from GitHub Repo" → select `reading-app`
-3. **Add a persistent volume** in the service settings:
-   - Mount path: `/data`
-   - This keeps your SQLite database safe across deploys
-4. **Set environment variables** in the Railway dashboard:
-   - `READING_APP_PASSWORD` — password for admin access (required)
-   - `DATABASE_PATH` — set to `/data/books.db`
-   - `ALLOWED_ORIGINS` — set to your Railway app URL (e.g., `https://reading-app-production-5700.up.railway.app`)
-5. **Deploy** — Railway auto-builds from the Dockerfile and assigns a `.up.railway.app` URL
-
-Railway auto-deploys on every push to the connected branch.
-
-### Self-hosted
-
-For self-hosted deployment, use a reverse proxy like Caddy for automatic HTTPS:
-
-```
-# Caddyfile
-books.yourdomain.com {
-    reverse_proxy localhost:3000
-}
-```
-
-## Data Migration
-
-On first run, the app automatically imports `books.json` into SQLite. After that, all data is stored in `books.db`.
+The site deploys to **GitHub Pages** via `.github/workflows/pages.yml` on every
+push to `main`. Enable it once under **Settings → Pages → Build and deployment →
+Source: GitHub Actions**.
 
 ## License
 
