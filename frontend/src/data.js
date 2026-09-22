@@ -86,20 +86,21 @@ export function parseDate(dateStr) {
     const trimmed = dateStr.trim();
     if (trimmed === '') return null;
 
-    const parts = trimmed.split('/');
-    const year = parseInt(parts[0], 10);
-    if (Number.isNaN(year) || year < 1900) return null;
+    const match = /^(\d{4})(?:\/(\d{2})(?:\/(\d{2}))?)?$/.exec(trimmed);
+    if (!match) return null;
+
+    const year = Number(match[1]);
+    if (year < 1900) return null;
 
     const result = { year, month: 0, day: 0 };
-
-    if (parts.length > 1 && parts[1] !== '') {
-        const month = parseInt(parts[1], 10);
-        if (Number.isNaN(month) || month < 1 || month > 12) return null;
+    if (match[2] !== undefined) {
+        const month = Number(match[2]);
+        if (month < 1 || month > 12) return null;
         result.month = month;
     }
-    if (parts.length > 2 && parts[2] !== '') {
-        const day = parseInt(parts[2], 10);
-        if (Number.isNaN(day) || day < 1 || day > 31) return null;
+    if (match[3] !== undefined) {
+        const day = Number(match[3]);
+        if (day < 1 || day > 31) return null;
         result.day = day;
     }
     return result;
